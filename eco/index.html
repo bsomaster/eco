@@ -186,6 +186,35 @@
             color: #5f6368;
             margin-top: 4px;
         }
+
+        .search-results {
+            margin-top: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            background: #fff;
+            display: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+            line-height: 1.4;
+        }
+
+        .search-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-item:hover {
+            background: var(--light-gray);
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -211,6 +240,7 @@
             <div class="input-box">
                 <label for="searchInput">Pesquisar Região</label>
                 <input type="text" id="searchInput" placeholder="País, Cidade ou Bairro">
+                <div id="searchResults" class="search-results"></div>
                 <button onclick="searchRegion()">Buscar Área</button>
             </div>
             <div class="input-box">
@@ -286,6 +316,7 @@
 
     let points = [];
     let regionGeoJSON = null;
+    let searchResultsData = [];
 
     // Busca de Região via Nominatim
     async function searchRegion() {
@@ -293,31 +324,28 @@
         if (!query) return;
 
         const btn = event.target;
+        const resultsDiv = document.getElementById('searchResults');
+
         btn.innerText = 'Buscando...';
         btn.disabled = true;
+        resultsDiv.style.display = 'none';
 
         try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&polygon_geojson=1&limit=1`);
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&polygon_geojson=1&limit=5`);
             const data = await res.json();
 
             if (data && data.length > 0) {
-                const item = data[0];
-                regionGeoJSON = item.geojson;
+                searchResultsData = data;
+                resultsDiv.innerHTML = '';
+                resultsDiv.style.display = 'block';
 
-                regionLayer.clearLayers();
-                const layer = L.geoJSON(regionGeoJSON, {
-                    style: {
-                        color: '#1a73e8',
-                        weight: 2,
-                        fillOpacity: 0.1
-                    }
-                }).addTo(regionLayer);
-
-                map.fitBounds(layer.getBounds());
-
-                const area = turf.area(regionGeoJSON);
-                document.getElementById('regionArea').innerText = area.toLocaleString('pt-BR');
-                document.getElementById('regionResult').style.display = 'block';
+                data.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'search-item';
+                    div.innerText = item.display_name;
+                    div.onclick = () => selectRegion(index);
+                    resultsDiv.appendChild(div);
+                });
             } else {
                 alert('Nenhuma região encontrada.');
             }
@@ -328,6 +356,27 @@
             btn.innerText = 'Buscar Área';
             btn.disabled = false;
         }
+    }
+
+    function selectRegion(index) {
+        const item = searchResultsData[index];
+        regionGeoJSON = item.geojson;
+
+        regionLayer.clearLayers();
+        const layer = L.geoJSON(regionGeoJSON, {
+            style: {
+                color: '#1a73e8',
+                weight: 2,
+                fillOpacity: 0.1
+            }
+        }).addTo(regionLayer);
+
+        map.fitBounds(layer.getBounds());
+
+        const area = turf.area(regionGeoJSON);
+        document.getElementById('regionArea').innerText = area.toLocaleString('pt-BR');
+        document.getElementById('regionResult').style.display = 'block';
+        document.getElementById('searchResults').style.display = 'none';
     }
 
     // Upload de Shapefile
@@ -435,12 +484,15 @@
     function clearAll() {
         points = [];
         regionGeoJSON = null;
+        searchResultsData = [];
         regionLayer.clearLayers();
         pointsLayer.clearLayers();
         hullLayer.clearLayers();
         document.getElementById('pointsBody').innerHTML = '';
         document.getElementById('regionResult').style.display = 'none';
         document.getElementById('hullResult').style.display = 'none';
+        document.getElementById('searchResults').innerHTML = '';
+        document.getElementById('searchResults').style.display = 'none';
         document.getElementById('searchInput').value = '';
         document.getElementById('fileInput').value = '';
     }
