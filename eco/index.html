@@ -215,6 +215,203 @@
             background: var(--light-gray);
             color: var(--primary);
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 95%;
+            max-width: 1000px;
+            height: 90vh;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            text-align: right;
+        }
+
+        .close-modal {
+            background: none !important;
+            border: none !important;
+            font-size: 24px !important;
+            cursor: pointer;
+            color: #5f6368;
+            width: auto !important;
+            margin: 0 !important;
+            height: auto !important;
+        }
+
+        .points-table-large {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .points-table-large th, .points-table-large td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .points-table-large input {
+            width: 100%;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .action-btn {
+            padding: 6px 12px !important;
+            border-radius: 4px !important;
+            font-size: 12px !important;
+            cursor: pointer;
+            border: none;
+            width: auto !important;
+            margin: 0 4px !important;
+            height: auto !important;
+        }
+
+        .upload-btn-small {
+            width: 40px !important;
+            height: 40px !important;
+            padding: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin: 0 !important;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            align-items: center;
+        }
+
+        .edit-mode-btn {
+            width: 40px !important;
+            height: 40px !important;
+            padding: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin: 0 !important;
+            transition: background 0.3s;
+        }
+
+        .edit-mode-btn.active {
+            background: var(--success) !important;
+        }
+
+        .delete-btn { background: #ea4335 !important; color: white; }
+        .edit-btn { background: var(--primary) !important; color: white; }
+
+        /* Custom Popup styles */
+        .leaflet-popup-content {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px;
+        }
+        .popup-coords {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .popup-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .popup-btn {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            color: white;
+        }
+        .popup-copy { background: var(--primary); }
+        .popup-delete { background: #ea4335; }
+
+        .info-btn {
+            float: right;
+            background: none !important;
+            color: #5f6368;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 16px !important;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1002;
+            width: 220px;
+            right: 24px;
+            font-size: 12px;
+            color: var(--dark);
+        }
+
+        .info-tooltip b {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--primary);
+        }
+
+        .info-tooltip ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-tooltip li {
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
@@ -237,16 +434,32 @@
     <div class="sidebar">
         <div class="section">
             <div class="section-title">Localização</div>
-            <div class="input-box">
-                <label for="searchInput">Pesquisar Região</label>
-                <input type="text" id="searchInput" placeholder="País, Cidade ou Bairro">
-                <div id="searchResults" class="search-results"></div>
-                <button onclick="searchRegion()">Buscar Área</button>
+
+            <div id="searchControls">
+                <div class="input-box">
+                    <label for="searchInput">Pesquisar Região</label>
+                    <input type="text" id="searchInput" placeholder="País, Cidade ou Bairro">
+                    <div id="searchResults" class="search-results"></div>
+                    <div class="search-container">
+                        <button onclick="searchRegion()" style="margin-top: 0; flex: 1;">Buscar Área</button>
+                        <button class="upload-btn-small" onclick="document.getElementById('fileInput').click()" title="Carregar Shapefile (.zip)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </button>
+                        <input type="file" id="fileInput" accept=".zip" style="display: none;">
+                    </div>
+                </div>
             </div>
-            <div class="input-box">
-                <label for="fileInput">Carregar Personalizada</label>
-                <input type="file" id="fileInput" accept=".zip">
-                <div class="hint">Envie um Shapefile (.zip)</div>
+
+            <div id="selectedRegionControls" style="display: none; margin-bottom: 12px;">
+                <label>Região Ativa</label>
+                <div style="background: var(--light-gray); padding: 12px; border-radius: 8px;">
+                    <div id="selectedRegionName" style="font-size: 13px; font-weight: 500; color: var(--dark); margin-bottom: 8px; word-break: break-word;"></div>
+                    <button onclick="clearRegion()" style="width: 100%; height: 32px; background: #ea4335; margin: 0; font-size: 12px;">Limpar Shape</button>
+                </div>
             </div>
 
             <div id="regionResult" class="result-card" style="display: none;">
@@ -257,46 +470,138 @@
 
         <div class="section">
             <div class="section-title">Pontos e Coordenadas</div>
-            <div class="input-box">
-                <div style="display: flex; gap: 8px;">
-                    <div style="flex: 1;">
-                        <label for="latInput">Latitude</label>
-                        <input type="number" id="latInput" placeholder="-23.55" step="any">
-                    </div>
-                    <div style="flex: 1;">
-                        <label for="lngInput">Longitude</label>
-                        <input type="number" id="lngInput" placeholder="-46.63" step="any">
-                    </div>
-                </div>
-                <button onclick="addPointManual()">Adicionar Ponto</button>
-                <div class="hint">Ou clique diretamente no mapa</div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                <button onclick="toggleModal(true)" style="margin: 0; flex: 1;">Lista de Coordenadas</button>
+                <button id="toggleEditMode" class="edit-mode-btn" onclick="toggleEditMode()" title="Ativar/Desativar clique no mapa">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </button>
             </div>
 
-            <div class="points-container">
-                <table class="points-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pointsBody">
-                    </tbody>
-                </table>
-            </div>
-
-            <button class="success" style="margin-top: 16px;" onclick="calculateHull()">Calcular Polígono Convexo</button>
-            <button style="background: #ea4335; margin-top: 8px;" onclick="clearAll()">Limpar Tudo</button>
+            <button id="btnCalculateHull" class="success" onclick="calculateHull()" style="display: none;">Calcular Polígono Convexo</button>
 
             <div id="hullResult" class="result-card" style="display: none;">
-                <div class="metric-label">Área do Polígono (MPC)</div>
+                <div class="metric-label">Extensão de Ocorrência (EOO)</div>
                 <div class="metric-value"><span id="hullArea">0</span> m²</div>
+            </div>
+
+            <div id="occurrenceRateResult" class="result-card" style="display: none; position: relative;">
+                <button class="info-btn" onclick="showRateInfo(event)" title="Ver classificação">ⓘ</button>
+                <div id="rateInfoTooltip" class="info-tooltip">
+                    <b>Classificação EOO:</b>
+                    <ul>
+                        <li>• Muito Baixa: Até 20%</li>
+                        <li>• Baixa: 20,1% a 40%</li>
+                        <li>• Moderada: 40,1% a 60%</li>
+                        <li>• Alta: 60,1% a 80%</li>
+                        <li>• Muito Alta: Acima de 80%</li>
+                    </ul>
+                </div>
+                <div class="metric-label">Taxa de Ocorrência</div>
+                <div class="metric-value" id="occurrenceRateLabel">-</div>
+                <div class="hint"><span id="occurrenceRatePercent">0</span>% da área selecionada</div>
+            </div>
+
+            <button id="btnTriangulate" class="success" onclick="triangulateHull()" style="display: none; margin-top: 8px; background: #8e24aa;">Dividir em 100 Triângulos (Retopologia)</button>
+
+            <div id="triangulationControls" style="display: none; margin-top: 8px;">
+                <label for="triangulationMode" style="font-size: 12px; margin-bottom: 4px; display: block;">Modo de Retopologia:</label>
+                <select id="triangulationMode" onchange="triangulateHull()" style="width: 100%; height: 36px; border-radius: 8px; border: 1px solid var(--border); padding: 0 8px; font-size: 13px;">
+                    <option value="retopology">Retopologia em Anéis (100 partes iguais)</option>
+                    <option value="fan">Radial / Leque (100 partes iguais)</option>
+                </select>
+            </div>
+
+            <div id="triangulationResult" class="result-card" style="display: none;">
+                <div style="margin-bottom: 8px;">
+                    <div class="metric-label">Área Média de Cada Parte</div>
+                    <div class="metric-value"><span id="triAreaUnit">0</span> m²</div>
+                    <div class="hint">Polígono 100% preenchido (100 partes adaptadas)</div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px;">
+                    <div class="metric-label">Soma da Área das 100 Partes</div>
+                    <div class="metric-value" style="font-size: 15px;"><span id="triAreaSum">0</span> m² (100% da EOO)</div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px;">
+                    <div class="metric-label">Margem de Erro por Variação de Área</div>
+                    <div class="metric-value" style="font-size: 15px; color: #1a73e8;">
+                        &plusmn;<span id="triErrorMargin">0</span> m² (<span id="triErrorPercent">0</span>%)
+                    </div>
+                    <div class="hint" style="margin-top: 4px; line-height: 1.4;">
+                        Variação máxima em relação à área média ideal.<br>
+                        • Menor parte: <span id="triAreaMin">0</span> m²<br>
+                        • Maior parte: <span id="triAreaMax">0</span> m²
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div id="analysisSection" style="display: none; margin-top: 24px;">
+                <div class="section-title">Análise de Ocupação</div>
+                <div class="input-box">
+                    <label for="squareSizeInput">Tamanho do Quadrante (m²)</label>
+                    <input type="number" id="squareSizeInput" placeholder="Ex: 10000" step="any">
+                    <button class="success" onclick="runAnalysis()">Fazer Análise</button>
+                </div>
+
+                <div id="analysisResult" class="result-card" style="display: none;">
+                    <div class="metric-label">Área de Ocupação (AOO)</div>
+                    <div class="metric-value"><span id="aooArea">0</span> m²</div>
+                </div>
+
+                <div id="occupationRateResult" class="result-card" style="display: none; position: relative;">
+                    <button class="info-btn" onclick="showOccupationRateInfo(event)" title="Ver classificação">ⓘ</button>
+                    <div id="occupationRateInfoTooltip" class="info-tooltip">
+                        <b>Classificação AOO:</b>
+                        <ul>
+                            <li>• Muito Baixa: Até 20%</li>
+                            <li>• Baixa: 20,1% a 40%</li>
+                            <li>• Moderada: 40,1% a 60%</li>
+                            <li>• Alta: 60,1% a 80%</li>
+                            <li>• Muito Alta: Acima de 80%</li>
+                        </ul>
+                    </div>
+                    <div class="metric-label">Taxa de Ocupação</div>
+                    <div class="metric-value" id="occupationRateLabel">-</div>
+                    <div class="hint"><span id="occupationRatePercent">0</span>% da área selecionada</div>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="map"></div>
+</div>
+
+<div id="coordsModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Gerenciar Coordenadas</h2>
+            <button class="close-modal" onclick="toggleModal(false)">&times;</button>
+        </div>
+        <div class="modal-body">
+            <table class="points-table-large">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="modalPointsBody">
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="action-btn delete-btn" style="float: left;" onclick="deleteAllPoints()">Excluir Tudo</button>
+            <button class="action-btn" style="background: #5f6368; color: white;" onclick="toggleModal(false)">Fechar</button>
+        </div>
+    </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -336,10 +641,13 @@
     const regionLayer = L.featureGroup().addTo(map);
     const pointsLayer = L.featureGroup().addTo(map);
     const hullLayer = L.featureGroup().addTo(map);
+    const trianglesLayer = L.featureGroup().addTo(map);
 
     let points = [];
     let regionGeoJSON = null;
     let searchResultsData = [];
+    let editMode = false;
+    let currentHullGeoJSON = null;
 
     // Busca de Região via Nominatim
     async function searchRegion() {
@@ -399,7 +707,23 @@
         const area = turf.area(regionGeoJSON);
         document.getElementById('regionArea').innerText = area.toLocaleString('pt-BR');
         document.getElementById('regionResult').style.display = 'block';
+
+        // Alternar visualização
+        document.getElementById('selectedRegionName').innerText = item.display_name;
+        document.getElementById('searchControls').style.display = 'none';
+        document.getElementById('selectedRegionControls').style.display = 'block';
         document.getElementById('searchResults').style.display = 'none';
+    }
+
+    function clearRegion() {
+        regionGeoJSON = null;
+        regionLayer.clearLayers();
+        document.getElementById('regionResult').style.display = 'none';
+        document.getElementById('occurrenceRateResult').style.display = 'none';
+        document.getElementById('searchControls').style.display = 'block';
+        document.getElementById('selectedRegionControls').style.display = 'none';
+        document.getElementById('searchInput').value = '';
+        document.getElementById('fileInput').value = '';
     }
 
     // Upload de Shapefile
@@ -407,10 +731,11 @@
         const file = e.target.files[0];
         if (!file) return;
 
+        const fileName = file.name;
         const reader = new FileReader();
-        const label = document.querySelector('label[for="fileInput"]');
-        const originalText = label.innerText;
-        label.innerText = 'Processando...';
+        const btn = document.querySelector('.upload-btn-small');
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '...';
 
         reader.onload = async function() {
             try {
@@ -426,53 +751,173 @@
                 const area = turf.area(geojson);
                 document.getElementById('regionArea').innerText = area.toLocaleString('pt-BR');
                 document.getElementById('regionResult').style.display = 'block';
+
+                // Alternar visualização
+                document.getElementById('selectedRegionName').innerText = `Arquivo: ${fileName}`;
+                document.getElementById('searchControls').style.display = 'none';
+                document.getElementById('selectedRegionControls').style.display = 'block';
             } catch (err) {
                 alert('Erro ao ler Shapefile. Envie o .zip contendo os arquivos.');
             } finally {
-                label.innerText = originalText;
+                btn.innerHTML = originalContent;
             }
         };
         reader.readAsArrayBuffer(file);
     });
 
-    // Adição de Pontos
-    map.on('click', function(e) {
-        addPoint(e.latlng.lat, e.latlng.lng);
-    });
+    function toggleModal(show) {
+        const modal = document.getElementById('coordsModal');
+        modal.style.display = show ? 'flex' : 'none';
+        if (show) updateModalPointsTable();
+    }
 
-    function addPointManual() {
-        const lat = parseFloat(document.getElementById('latInput').value);
-        const lng = parseFloat(document.getElementById('lngInput').value);
+    function updateModalPointsTable() {
+        const tbody = document.getElementById('modalPointsBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        points.forEach((p, i) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${p[1].toFixed(6)}</td>
+                <td>${p[0].toFixed(6)}</td>
+                <td>
+                    <button class="action-btn delete-btn" onclick="deletePoint(${i})">Excluir</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        const addRow = document.createElement('tr');
+        addRow.innerHTML = `
+            <td>+</td>
+            <td><input type="number" step="any" placeholder="Latitude" id="new-lat"></td>
+            <td><input type="number" step="any" placeholder="Longitude" id="new-lng"></td>
+            <td>
+                <button class="action-btn edit-btn" style="background: var(--success) !important;" onclick="addPointFromModal()">Adicionar</button>
+            </td>
+        `;
+        tbody.appendChild(addRow);
+    }
+
+    function deletePoint(index) {
+        points.splice(index, 1);
+        redrawMarkers();
+        updateModalPointsTable();
+    }
+
+    function addPointFromModal() {
+        const latInput = document.getElementById('new-lat');
+        const lngInput = document.getElementById('new-lng');
+        const lat = parseFloat(latInput.value);
+        const lng = parseFloat(lngInput.value);
         if (!isNaN(lat) && !isNaN(lng)) {
             addPoint(lat, lng);
-            document.getElementById('latInput').value = '';
-            document.getElementById('lngInput').value = '';
+            latInput.value = '';
+            lngInput.value = '';
+            updateModalPointsTable();
         }
     }
 
-    function addPoint(lat, lng) {
-        points.push([lng, lat]); // Turf: [lng, lat]
-        L.circleMarker([lat, lng], {
-            radius: 6,
-            fillColor: "#ea4335",
-            color: "#fff",
-            weight: 2,
-            fillOpacity: 1
-        }).addTo(pointsLayer);
-        updatePointsTable();
+    function toggleEditMode() {
+        editMode = !editMode;
+        const btn = document.getElementById('toggleEditMode');
+        if (editMode) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+        redrawMarkers();
     }
 
-    function updatePointsTable() {
-        const tbody = document.getElementById('pointsBody');
-        tbody.innerHTML = '';
-        points.forEach((p, i) => {
-            const row = `<tr>
-                <td>${i + 1}</td>
-                <td>${p[1].toFixed(5)}</td>
-                <td>${p[0].toFixed(5)}</td>
-            </tr>`;
-            tbody.innerHTML += row;
+    function redrawMarkers() {
+        pointsLayer.clearLayers();
+        points.forEach((p, index) => {
+            const marker = L.circleMarker([p[1], p[0]], {
+                radius: 6,
+                fillColor: "#ea4335",
+                color: "#fff",
+                weight: 2,
+                fillOpacity: 1
+            }).addTo(pointsLayer);
+
+            if (!editMode) {
+                const content = `
+                    <div class="popup-coords">${p[1].toFixed(6)}, ${p[0].toFixed(6)}</div>
+                    <div class="popup-actions">
+                        <button class="popup-btn popup-copy" onclick="copyCoords(${p[1]}, ${p[0]})">Copiar</button>
+                        <button class="popup-btn popup-delete" onclick="deletePoint(${index})">Excluir</button>
+                    </div>
+                `;
+                marker.bindPopup(content);
+                // Mostrar ao passar o mouse
+                marker.on('mouseover', function (e) {
+                    this.openPopup();
+                });
+            }
         });
+
+        // Atualizar visibilidade do botão de polígono
+        const btnHull = document.getElementById('btnCalculateHull');
+        if (points.length >= 3) {
+            btnHull.style.display = 'block';
+        } else {
+            btnHull.style.display = 'none';
+        }
+    }
+
+    function copyCoords(lat, lng) {
+        const text = `${lat}, ${lng}`;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Coordenadas copiadas: ' + text);
+        });
+    }
+
+    function showRateInfo(event) {
+        event.stopPropagation();
+        const tooltip = document.getElementById('rateInfoTooltip');
+        tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        // Fechar o outro tooltip se estiver aberto
+        const other = document.getElementById('occupationRateInfoTooltip');
+        if (other) other.style.display = 'none';
+    }
+
+    function showOccupationRateInfo(event) {
+        event.stopPropagation();
+        const tooltip = document.getElementById('occupationRateInfoTooltip');
+        tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        // Fechar o outro tooltip se estiver aberto
+        const other = document.getElementById('rateInfoTooltip');
+        if (other) other.style.display = 'none';
+    }
+
+    // Fechar balão ao clicar fora
+    document.addEventListener('click', function(e) {
+        const tooltips = [document.getElementById('rateInfoTooltip'), document.getElementById('occupationRateInfoTooltip')];
+        tooltips.forEach(tooltip => {
+            if (tooltip && tooltip.style.display === 'block') {
+                if (!tooltip.contains(e.target) && !e.target.classList.contains('info-btn')) {
+                    tooltip.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Adição de Pontos
+    map.on('click', function(e) {
+        if (editMode) {
+            addPoint(e.latlng.lat, e.latlng.lng);
+        }
+    });
+
+    function addPoint(lat, lng) {
+        points.push([lng, lat]); // Turf: [lng, lat]
+        redrawMarkers();
+
+        if (document.getElementById('coordsModal').style.display === 'flex') {
+            updateModalPointsTable();
+        }
     }
 
     // Cálculo do Mínimo Polígono Convexo (MPC)
@@ -486,7 +931,11 @@
         const hull = turf.convex(featureCollection);
 
         if (hull) {
+            currentHullGeoJSON = hull;
             hullLayer.clearLayers();
+            trianglesLayer.clearLayers();
+            document.getElementById('triangulationResult').style.display = 'none';
+
             L.geoJSON(hull, {
                 style: {
                     color: '#34a853',
@@ -499,25 +948,474 @@
             const area = turf.area(hull);
             document.getElementById('hullArea').innerText = area.toLocaleString('pt-BR');
             document.getElementById('hullResult').style.display = 'block';
+            document.getElementById('btnTriangulate').style.display = 'block';
+
+            // Cálculo da Taxa de Ocorrência
+            if (regionGeoJSON) {
+                const regionArea = turf.area(regionGeoJSON);
+                const percent = (area / regionArea) * 100;
+
+                let label = "";
+                if (percent <= 20) label = "Muito Baixa";
+                else if (percent <= 40) label = "Baixa";
+                else if (percent <= 60) label = "Moderada";
+                else if (percent <= 80) label = "Alta";
+                else label = "Muito Alta";
+
+                document.getElementById('occurrenceRateLabel').innerText = label;
+                document.getElementById('occurrenceRatePercent').innerText = percent.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+                document.getElementById('occurrenceRateResult').style.display = 'block';
+            }
+
+            // Mostrar opção de análise
+            document.getElementById('analysisSection').style.display = 'block';
         } else {
             alert('Não foi possível formar um polígono convexo.');
         }
     }
 
+    // --- Algoritmos de Divisão em 100 Triângulos de Mesma Área ---
+
+    function getPolygonCentroid(pts) {
+        let area = 0, cx = 0, cy = 0;
+        const n = pts.length;
+        for (let i = 0; i < n; i++) {
+            const p1 = pts[i];
+            const p2 = pts[(i + 1) % n];
+            const cross = p1.x * p2.y - p2.x * p1.y;
+            area += cross;
+            cx += (p1.x + p2.x) * cross;
+            cy += (p1.y + p2.y) * cross;
+        }
+        area /= 2;
+        if (Math.abs(area) < 1e-9) {
+            let sx = 0, sy = 0;
+            pts.forEach(p => { sx += p.x; sy += p.y; });
+            return { x: sx / n, y: sy / n };
+        }
+        cx /= (6 * area);
+        cy /= (6 * area);
+        return { x: cx, y: cy };
+    }
+
+    function ensureCounterClockwise(pts) {
+        let signedArea = 0;
+        const n = pts.length;
+        for (let i = 0; i < n; i++) {
+            const p1 = pts[i];
+            const p2 = pts[(i + 1) % n];
+            signedArea += (p1.x * p2.y - p2.x * p1.y);
+        }
+        if (signedArea < 0) {
+            pts.reverse();
+        }
+        return pts;
+    }
+
+    function getPointAtCumulativeArea(targetArea, pts, C, mainAreas, cumAreas, totalArea) {
+        targetArea = Math.max(0, Math.min(totalArea, targetArea));
+        if (targetArea <= 0) return { x: pts[0].x, y: pts[0].y };
+        if (targetArea >= totalArea) return { x: pts[0].x, y: pts[0].y };
+
+        let j = 0;
+        while (j < mainAreas.length - 1 && cumAreas[j + 1] <= targetArea) {
+            j++;
+        }
+
+        const remArea = targetArea - cumAreas[j];
+        const a = mainAreas[j];
+        const t = a > 0 ? remArea / a : 0;
+
+        const p1 = pts[j];
+        const p2 = pts[(j + 1) % pts.length];
+
+        return {
+            x: p1.x + t * (p2.x - p1.x),
+            y: p1.y + t * (p2.y - p1.y)
+        };
+    }
+
+    function getBoundaryPath(Ba, Bb, origPts) {
+        const n = origPts.length;
+
+        function distToSegment(P, V1, V2) {
+            const l2 = (V2.x - V1.x) ** 2 + (V2.y - V1.y) ** 2;
+            if (l2 === 0) return Math.hypot(P.x - V1.x, P.y - V1.y);
+            let t = ((P.x - V1.x) * (V2.x - V1.x) + (P.y - V1.y) * (V2.y - V1.y)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            const projX = V1.x + t * (V2.x - V1.x);
+            const projY = V1.y + t * (V2.y - V1.y);
+            return Math.hypot(P.x - projX, P.y - projY);
+        }
+
+        let idxA = 0, minDistA = Infinity;
+        let idxB = 0, minDistB = Infinity;
+
+        for (let i = 0; i < n; i++) {
+            const dA = distToSegment(Ba, origPts[i], origPts[(i + 1) % n]);
+            if (dA < minDistA) {
+                minDistA = dA;
+                idxA = i;
+            }
+            const dB = distToSegment(Bb, origPts[i], origPts[(i + 1) % n]);
+            if (dB < minDistB) {
+                minDistB = dB;
+                idxB = i;
+            }
+        }
+
+        if (idxA === idxB) {
+            return [Ba, Bb];
+        }
+
+        const path = [Ba];
+        let curr = (idxA + 1) % n;
+
+        let safety = 0;
+        while (curr !== (idxB + 1) % n && safety < n + 2) {
+            const p = origPts[curr];
+            const last = path[path.length - 1];
+            const dLast = Math.hypot(p.x - last.x, p.y - last.y);
+            const dBb = Math.hypot(p.x - Bb.x, p.y - Bb.y);
+
+            if (dLast > 1e-2 && dBb > 1e-2) {
+                path.push(p);
+            }
+            curr = (curr + 1) % n;
+            safety++;
+        }
+
+        path.push(Bb);
+        return path;
+    }
+
+    function generateRadialFan100(pts, C) {
+        const n = pts.length;
+        const mainAreas = [];
+        const cumAreas = [0];
+        let totalArea = 0;
+
+        for (let j = 0; j < n; j++) {
+            const p1 = pts[j];
+            const p2 = pts[(j + 1) % n];
+            const area = 0.5 * Math.abs(C.x * (p1.y - p2.y) + p1.x * (p2.y - C.y) + p2.x * (C.y - p1.y));
+            mainAreas.push(area);
+            totalArea += area;
+            cumAreas.push(totalArea);
+        }
+
+        const N = 100;
+        const targetPerTri = totalArea / N;
+        const boundaryPts = [];
+
+        for (let i = 0; i < N; i++) {
+            const targetArea = i * targetPerTri;
+            boundaryPts.push(getPointAtCumulativeArea(targetArea, pts, C, mainAreas, cumAreas, totalArea));
+        }
+
+        const triangles = [];
+        for (let i = 0; i < N; i++) {
+            const b1 = boundaryPts[i];
+            const b2 = boundaryPts[(i + 1) % N];
+            const bPath = getBoundaryPath(b1, b2, pts);
+            triangles.push([C, ...bPath]);
+        }
+
+        return { triangles, totalArea };
+    }
+
+    function generateConcentricRetopology100(pts, C) {
+        const n = pts.length;
+
+        const mainAreas = [];
+        const cumAreas = [0];
+        let totalArea = 0;
+
+        for (let j = 0; j < n; j++) {
+            const p1 = pts[j];
+            const p2 = pts[(j + 1) % n];
+            const area = 0.5 * Math.abs(C.x * (p1.y - p2.y) + p1.x * (p2.y - C.y) + p2.x * (C.y - p1.y));
+            mainAreas.push(area);
+            totalArea += area;
+            cumAreas.push(totalArea);
+        }
+
+        // Scale factors for 4 concentric rings to partition area into 6, 18, 30, 46 equal parts:
+        // Ring 0: 6 triangles (0.06 of total area) => scale1 = sqrt(0.06)
+        // Ring 1: 18 triangles (0.18 of total area) => scale2 = sqrt(0.06 + 0.18) = sqrt(0.24)
+        // Ring 2: 30 triangles (0.30 of total area) => scale3 = sqrt(0.24 + 0.30) = sqrt(0.54)
+        // Ring 3: 46 triangles (0.46 of total area) => scale4 = 1.0 (0.54 + 0.46 = 1.00)
+        // Total triangles = 6 + 18 + 30 + 46 = 100
+        const scales = [Math.sqrt(0.06), Math.sqrt(0.24), Math.sqrt(0.54), 1.0];
+        const ringCounts = [6, 12, 18, 28];
+
+        const ringVertices = [];
+
+        for (let rIdx = 0; rIdx < 4; rIdx++) {
+            const scale = scales[rIdx];
+            const V = ringCounts[rIdx];
+
+            const scaledPts = pts.map(p => ({
+                x: C.x + scale * (p.x - C.x),
+                y: C.y + scale * (p.y - C.y)
+            }));
+
+            const scaledMainAreas = mainAreas.map(a => a * scale * scale);
+            const scaledCumAreas = cumAreas.map(c => c * scale * scale);
+            const scaledTotalArea = totalArea * scale * scale;
+
+            const vertices = [];
+            const targetPerVertex = scaledTotalArea / V;
+
+            for (let k = 0; k < V; k++) {
+                const targetArea = k * targetPerVertex;
+                vertices.push(getPointAtCumulativeArea(targetArea, scaledPts, C, scaledMainAreas, scaledCumAreas, scaledTotalArea));
+            }
+            ringVertices.push(vertices);
+        }
+
+        const triangles = [];
+
+        // Ring 0: Center C connected to Ring 1 (6 vertices) -> 6 triangles
+        const R1 = ringVertices[0];
+        for (let k = 0; k < R1.length; k++) {
+            const nextK = (k + 1) % R1.length;
+            triangles.push([C, R1[k], R1[nextK]]);
+        }
+
+        function zipRings(InRing, OutRing, isOuterRing = false) {
+            const Vin = InRing.length;
+            const Vout = OutRing.length;
+            let i = 0, j = 0;
+
+            while (i < Vin || j < Vout) {
+                const pIn = (i + 1) / Vin;
+                const pOut = (j + 1) / Vout;
+
+                if (i < Vin && (j >= Vout || pIn <= pOut)) {
+                    const nextI = (i + 1) % Vin;
+                    const currJ = j % Vout;
+                    triangles.push([InRing[i], InRing[nextI], OutRing[currJ]]);
+                    i++;
+                } else {
+                    const currI = i % Vin;
+                    const nextJ = (j + 1) % Vout;
+                    if (isOuterRing) {
+                        const bPath = getBoundaryPath(OutRing[j], OutRing[nextJ], pts);
+                        triangles.push([InRing[currI], ...bPath]);
+                    } else {
+                        triangles.push([InRing[currI], OutRing[j], OutRing[nextJ]]);
+                    }
+                    j++;
+                }
+            }
+        }
+
+        // Ring 1: 6 inner + 12 outer -> 18 triangles
+        zipRings(ringVertices[0], ringVertices[1], false);
+
+        // Ring 2: 12 inner + 18 outer -> 30 triangles
+        zipRings(ringVertices[1], ringVertices[2], false);
+
+        // Ring 3: 18 inner + 28 outer -> 46 triangles
+        zipRings(ringVertices[2], ringVertices[3], true);
+
+        return { triangles, totalArea };
+    }
+
+    function triangulateHull() {
+        if (!currentHullGeoJSON) {
+            alert('Por favor, calcule o polígono convexo primeiro.');
+            return;
+        }
+
+        trianglesLayer.clearLayers();
+
+        let coords = currentHullGeoJSON.geometry.coordinates[0];
+        if (coords.length > 1 && coords[0][0] === coords[coords.length - 1][0] && coords[0][1] === coords[coords.length - 1][1]) {
+            coords = coords.slice(0, coords.length - 1);
+        }
+
+        let pts = coords.map(c => {
+            const proj = L.CRS.EPSG3857.project(L.latLng(c[1], c[0]));
+            return { x: proj.x, y: proj.y };
+        });
+
+        pts = ensureCounterClockwise(pts);
+        const C = getPolygonCentroid(pts);
+
+        const mode = document.getElementById('triangulationMode') ? document.getElementById('triangulationMode').value : 'retopology';
+
+        let res;
+        if (mode === 'fan') {
+            res = generateRadialFan100(pts, C);
+        } else {
+            res = generateConcentricRetopology100(pts, C);
+        }
+
+        const triangles = res.triangles;
+        let sumTrianglesGeodesicArea = 0;
+
+        let minTileArea = Infinity;
+        let maxTileArea = -Infinity;
+
+        triangles.forEach((tri, idx) => {
+            const leafletLatLngs = [];
+            const turfCoords = [];
+
+            tri.forEach(p => {
+                const ll = L.CRS.EPSG3857.unproject(L.point(p.x, p.y));
+                leafletLatLngs.push([ll.lat, ll.lng]);
+                turfCoords.push([ll.lng, ll.lat]);
+            });
+            turfCoords.push(turfCoords[0]);
+
+            const triPolygonGeoJSON = turf.polygon([turfCoords]);
+            const triGeodesicArea = turf.area(triPolygonGeoJSON);
+            sumTrianglesGeodesicArea += triGeodesicArea;
+
+            if (triGeodesicArea < minTileArea) minTileArea = triGeodesicArea;
+            if (triGeodesicArea > maxTileArea) maxTileArea = triGeodesicArea;
+
+            const poly = L.polygon(leafletLatLngs, {
+                color: '#8e24aa',
+                weight: 1.5,
+                opacity: 0.85,
+                fillColor: (idx % 2 === 0) ? '#ab47bc' : '#ce93d8',
+                fillOpacity: 0.4
+            }).addTo(trianglesLayer);
+
+            const labelType = tri.length === 3 ? "Triângulo" : "Polígono";
+            poly.bindTooltip(`<b>${labelType} #${idx + 1}</b><br>Área: ${triGeodesicArea.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²`, {
+                sticky: true
+            });
+        });
+
+        const avgUnitArea = sumTrianglesGeodesicArea / triangles.length;
+        const diffMaxMin = maxTileArea - minTileArea;
+        const diffMaxMinPercent = avgUnitArea > 0 ? (diffMaxMin / avgUnitArea) * 100 : 0;
+
+        document.getElementById('triAreaUnit').innerText = avgUnitArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+        document.getElementById('triAreaSum').innerText = sumTrianglesGeodesicArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+        document.getElementById('triErrorMargin').innerText = diffMaxMin.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+        document.getElementById('triErrorPercent').innerText = diffMaxMinPercent.toLocaleString('pt-BR', {maximumFractionDigits: 2});
+        if (document.getElementById('triAreaMin')) document.getElementById('triAreaMin').innerText = minTileArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+        if (document.getElementById('triAreaMax')) document.getElementById('triAreaMax').innerText = maxTileArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+
+        document.getElementById('triangulationResult').style.display = 'block';
+        document.getElementById('triangulationControls').style.display = 'block';
+
+        if (trianglesLayer.getBounds().isValid()) {
+            map.fitBounds(trianglesLayer.getBounds());
+        }
+    }
+
+
+
+    function runAnalysis() {
+        if (!regionGeoJSON) {
+            alert('Por favor, defina uma região na seção "Localização" primeiro.');
+            return;
+        }
+
+        const squareArea = parseFloat(document.getElementById('squareSizeInput').value);
+        if (isNaN(squareArea) || squareArea <= 0) {
+            alert('Informe um valor válido para a área do quadrante.');
+            return;
+        }
+
+        const totalArea = turf.area(regionGeoJSON);
+        const totalSquares = Math.floor(totalArea / squareArea);
+
+        const side = Math.sqrt(squareArea);
+        const occupiedCells = new Set();
+
+        points.forEach(p => {
+            const pt = turf.point(p);
+            let isInside = false;
+
+            if (regionGeoJSON.type === 'FeatureCollection') {
+                for (const feature of regionGeoJSON.features) {
+                    if (turf.booleanPointInPolygon(pt, feature)) {
+                        isInside = true;
+                        break;
+                    }
+                }
+            } else {
+                isInside = turf.booleanPointInPolygon(pt, regionGeoJSON);
+            }
+
+            if (isInside) {
+                // Projeta para metros usando Web Mercator (EPSG:3857) para definir o grid
+                const projected = L.CRS.EPSG3857.project(L.latLng(p[1], p[0]));
+                const ix = Math.floor(projected.x / side);
+                const iy = Math.floor(projected.y / side);
+                occupiedCells.add(`${ix},${iy}`);
+            }
+        });
+
+        const aoo = occupiedCells.size * squareArea;
+        document.getElementById('aooArea').innerText = aoo.toLocaleString('pt-BR');
+        document.getElementById('analysisResult').style.display = 'block';
+
+        // Cálculo da Taxa de Ocupação
+        if (regionGeoJSON) {
+            const regionArea = turf.area(regionGeoJSON);
+            const percent = (aoo / regionArea) * 100;
+
+            let label = "";
+            if (percent <= 20) label = "Muito Baixa";
+            else if (percent <= 40) label = "Baixa";
+            else if (percent <= 60) label = "Moderada";
+            else if (percent <= 80) label = "Alta";
+            else label = "Muito Alta";
+
+            document.getElementById('occupationRateLabel').innerText = label;
+            document.getElementById('occupationRatePercent').innerText = percent.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+            document.getElementById('occupationRateResult').style.display = 'block';
+        }
+    }
+
     function clearAll() {
         points = [];
-        regionGeoJSON = null;
+        clearRegion();
         searchResultsData = [];
-        regionLayer.clearLayers();
         pointsLayer.clearLayers();
         hullLayer.clearLayers();
-        document.getElementById('pointsBody').innerHTML = '';
-        document.getElementById('regionResult').style.display = 'none';
+        trianglesLayer.clearLayers();
+        currentHullGeoJSON = null;
         document.getElementById('hullResult').style.display = 'none';
+        if (document.getElementById('btnTriangulate')) document.getElementById('btnTriangulate').style.display = 'none';
+        if (document.getElementById('triangulationControls')) document.getElementById('triangulationControls').style.display = 'none';
+        if (document.getElementById('triangulationResult')) document.getElementById('triangulationResult').style.display = 'none';
+        document.getElementById('occurrenceRateResult').style.display = 'none';
+        document.getElementById('analysisSection').style.display = 'none';
+        document.getElementById('analysisResult').style.display = 'none';
+        document.getElementById('occupationRateResult').style.display = 'none';
         document.getElementById('searchResults').innerHTML = '';
         document.getElementById('searchResults').style.display = 'none';
-        document.getElementById('searchInput').value = '';
-        document.getElementById('fileInput').value = '';
+        document.getElementById('squareSizeInput').value = '';
+        document.getElementById('btnCalculateHull').style.display = 'none';
+        updateModalPointsTable();
+    }
+
+    function deleteAllPoints() {
+        if (points.length === 0) return;
+        if (confirm('Deseja excluir todas as coordenadas?')) {
+            points = [];
+            redrawMarkers();
+            updateModalPointsTable();
+            hullLayer.clearLayers();
+            trianglesLayer.clearLayers();
+            currentHullGeoJSON = null;
+            document.getElementById('hullResult').style.display = 'none';
+            if (document.getElementById('btnTriangulate')) document.getElementById('btnTriangulate').style.display = 'none';
+            if (document.getElementById('triangulationControls')) document.getElementById('triangulationControls').style.display = 'none';
+            if (document.getElementById('triangulationResult')) document.getElementById('triangulationResult').style.display = 'none';
+            document.getElementById('occurrenceRateResult').style.display = 'none';
+            document.getElementById('analysisSection').style.display = 'none';
+            document.getElementById('analysisResult').style.display = 'none';
+        }
     }
 </script>
 
