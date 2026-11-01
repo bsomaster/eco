@@ -792,9 +792,7 @@
         btn.disabled = true;
 
         const speciesLinkEndpoints = [
-            `https://specieslink.net/api/v1/records/?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`,
-            `https://specieslink.net/v1/records/?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`,
-            `https://api.splink.org.br/records/scientificName/${encodeURIComponent(speciesName)}`
+            `https://specieslink.net/ws/1.0/search?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`
         ];
 
         const gbifEndpoints = [
@@ -836,7 +834,15 @@
         }
 
         let addedCount = 0;
-        const existingSet = new Set(points.map(p => `${p[1].toFixed(6)},${p[0].toFixed(6)}`));
+        let validCoordsCount = 0;
+        let invalidCoordsCount = 0;
+        let duplicatesCount = 0;
+
+        const existingSet = new Set(
+            points
+                .filter(p => Array.isArray(p) && p.length >= 2 && p[0] != null && p[1] != null && !isNaN(p[0]) && !isNaN(p[1]))
+                .map(p => `${Number(p[1]).toFixed(6)},${Number(p[0]).toFixed(6)}`)
+        );
 
         records.forEach(item => {
             let lat = null;
@@ -857,13 +863,18 @@
             }
 
             // Validar coordenadas válidas não-nulas
-            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && !(lat === 0 && lng === 0)) {
+            if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && !(lat === 0 && lng === 0)) {
+                validCoordsCount++;
                 const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
                 if (!existingSet.has(key)) {
                     existingSet.add(key);
                     points.push([lng, lat]); // Turf/Leaflet format: [lng, lat]
                     addedCount++;
+                } else {
+                    duplicatesCount++;
                 }
+            } else {
+                invalidCoordsCount++;
             }
         });
 
@@ -872,11 +883,11 @@
             if (document.getElementById('coordsModal').style.display === 'flex') {
                 updateModalPointsTable();
             }
-            alert(`Sucesso! ${addedCount} novas coordenadas da espécie "${speciesName}" foram importadas (${sourceLabel}). Total de coordenadas no projeto: ${points.length}.`);
+            alert(`Sucesso! ${addedCount} novas coordenadas da espécie "${speciesName}" foram importadas (${sourceLabel}).\n\nResumo da Busca:\n• Total de registros na API: ${records.length}\n• Novas coordenadas adicionadas: ${addedCount}\n• Coordenadas idênticas agrupadas (duplicadas): ${duplicatesCount}\n• Registros sem coordenadas geográficas válidas: ${invalidCoordsCount}\n\nTotal de pontos no projeto: ${points.length}.`);
         } else if (records.length > 0) {
-            alert(`A fonte selecionada (${sourceLabel}) retornou registros para "${speciesName}", mas nenhum deles possui coordenadas geográficas válidas.`);
+            alert(`A fonte selecionada (${sourceLabel}) retornou ${records.length} registros para "${speciesName}", mas nenhum deles possui novas coordenadas geográficas válidas (ou todas as coordenadas já pertencem ao projeto).`);
         } else {
-            alert(`Nenhum registro com coordenadas encontrado para a espécie "${speciesName}" na fonte (${sourceLabel}).`);
+            alert(`Nenhum registro encontrado para a espécie "${speciesName}" na fonte (${sourceLabel}).`);
         }
 
         btn.innerText = 'Buscar Correspondências';
@@ -1011,11 +1022,14 @@
         tbody.innerHTML = '';
 
         points.forEach((p, i) => {
+            if (!Array.isArray(p) || p.length < 2 || p[0] == null || p[1] == null || isNaN(p[0]) || isNaN(p[1])) return;
+            const lat = Number(p[1]);
+            const lng = Number(p[0]);
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${i + 1}</td>
-                <td>${p[1].toFixed(6)}</td>
-                <td>${p[0].toFixed(6)}</td>
+                <td>${lat.toFixed(6)}</td>
+                <td>${lng.toFixed(6)}</td>
                 <td>
                     <button class="action-btn delete-btn" onclick="deletePoint(${i})">Excluir</button>
                 </td>
@@ -1068,7 +1082,10 @@
     function redrawMarkers() {
         pointsLayer.clearLayers();
         points.forEach((p, index) => {
-            const marker = L.circleMarker([p[1], p[0]], {
+            if (!Array.isArray(p) || p.length < 2 || p[0] == null || p[1] == null || isNaN(p[0]) || isNaN(p[1])) return;
+            const lat = Number(p[1]);
+            const lng = Number(p[0]);
+            const marker = L.circleMarker([lat, lng], {
                 radius: 6,
                 fillColor: "#ea4335",
                 color: "#fff",
@@ -1078,9 +1095,9 @@
 
             if (!editMode) {
                 const content = `
-                    <div class="popup-coords">${p[1].toFixed(6)}, ${p[0].toFixed(6)}</div>
+                    <div class="popup-coords">${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
                     <div class="popup-actions">
-                        <button class="popup-btn popup-copy" onclick="copyCoords(${p[1]}, ${p[0]})">Copiar</button>
+                        <button class="popup-btn popup-copy" onclick="copyCoords(${lat}, ${lng})">Copiar</button>
                         <button class="popup-btn popup-delete" onclick="deletePoint(${index})">Excluir</button>
                     </div>
                 `;
@@ -1146,6 +1163,9 @@
     });
 
     function addPoint(lat, lng) {
+        lat = parseFloat(lat);
+        lng = parseFloat(lng);
+        if (isNaN(lat) || isNaN(lng) || lat == null || lng == null) return;
         points.push([lng, lat]); // Turf: [lng, lat]
         redrawMarkers();
 

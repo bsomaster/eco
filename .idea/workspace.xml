@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c32ff435-1f79-4189-bc00-a646911b15f1" name="Changes" comment="Alteração de pastas">
+    <list default="true" id="c32ff435-1f79-4189-bc00-a646911b15f1" name="Changes" comment="Ajuste de CORS">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -153,7 +154,15 @@
       <option name="project" value="LOCAL" />
       <updated>1793553824091</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Ajuste de CORS">
+      <option name="closed" value="true" />
+      <created>1793554832386</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1793554832386</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -178,6 +187,7 @@
     <MESSAGE value="Busca inicial" />
     <MESSAGE value="Divisão de fontes" />
     <MESSAGE value="Alteração de pastas" />
-    <option name="LAST_COMMIT_MESSAGE" value="Alteração de pastas" />
+    <MESSAGE value="Ajuste de CORS" />
+    <option name="LAST_COMMIT_MESSAGE" value="Ajuste de CORS" />
   </component>
 </project>
