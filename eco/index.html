@@ -469,6 +469,16 @@
         </div>
 
         <div class="section">
+            <div class="section-title">Busca por Espécie (speciesLink)</div>
+            <div class="input-box">
+                <label for="speciesSearchInput">Nome da Espécie</label>
+                <input type="text" id="speciesSearchInput" placeholder="Ex: Euterpe edulis, Panthera onca">
+                <div id="speciesSearchResults" class="search-results"></div>
+                <button id="btnSearchSpecies" onclick="searchSpeciesName()" style="margin-top: 8px;">Buscar Correspondências</button>
+            </div>
+        </div>
+
+        <div class="section">
             <div class="section-title">Pontos e Coordenadas</div>
             <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
                 <button onclick="toggleModal(true)" style="margin: 0; flex: 1;">Lista de Coordenadas</button>
@@ -661,8 +671,170 @@
     let editMode = false;
     let currentHullGeoJSON = null;
 
+    // Chave de API do speciesLink fornecida pelo usuário
+    const SPECIESLINK_API_KEY = "BneggsmyVPpMYsqUcBAd";
+
     // Limite máximo de variação de área permitido entre o maior e o menor triângulo (%)
     const MAX_AREA_DIFFERENCE_PERCENT = 5;
+
+    // Busca de sugestões/correspondências de nomes de espécies
+    async function searchSpeciesName() {
+        const query = document.getElementById('speciesSearchInput').value.trim();
+        if (!query) {
+            alert('Por favor, digite o nome de uma espécie.');
+            return;
+        }
+
+        const btn = document.getElementById('btnSearchSpecies');
+        const resultsDiv = document.getElementById('speciesSearchResults');
+
+        btn.innerText = 'Buscando sugestões...';
+        btn.disabled = true;
+        resultsDiv.style.display = 'none';
+        resultsDiv.innerHTML = '';
+
+        try {
+            // Busca sugestões/correspondências de nome científico via API da GBIF
+            const res = await fetch(`https://api.gbif.org/v1/species/suggest?q=${encodeURIComponent(query)}&limit=8`);
+            const data = await res.json();
+
+            resultsDiv.innerHTML = '';
+            resultsDiv.style.display = 'block';
+
+            const uniqueNames = new Set();
+            if (data && data.length > 0) {
+                data.forEach(item => {
+                    const name = item.canonicalName || item.scientificName;
+                    if (name && !uniqueNames.has(name)) {
+                        uniqueNames.add(name);
+                        const div = document.createElement('div');
+                        div.className = 'search-item';
+                        div.innerHTML = `<b>${name}</b> ${item.rank ? `<small style="color:#5f6368;">(${item.rank})</small>` : ''}`;
+                        div.onclick = () => selectSpeciesMatch(name);
+                        resultsDiv.appendChild(div);
+                    }
+                });
+            }
+
+            // Opção para buscar exatamente o texto digitado pelo usuário
+            if (!uniqueNames.has(query)) {
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.style.background = '#f8f9fa';
+                div.innerHTML = `Buscar no speciesLink: <i>"${query}"</i>`;
+                div.onclick = () => selectSpeciesMatch(query);
+                resultsDiv.appendChild(div);
+            }
+        } catch (err) {
+            console.error(err);
+            selectSpeciesMatch(query);
+        } finally {
+            btn.innerText = 'Buscar Correspondências';
+            btn.disabled = false;
+        }
+    }
+
+    function selectSpeciesMatch(speciesName) {
+        document.getElementById('speciesSearchInput').value = speciesName;
+        document.getElementById('speciesSearchResults').style.display = 'none';
+        fetchSpeciesLinkCoordinates(speciesName);
+    }
+
+    async function fetchSpeciesLinkCoordinates(speciesName) {
+        const btn = document.getElementById('btnSearchSpecies');
+        btn.innerText = 'Carregando do speciesLink...';
+        btn.disabled = true;
+
+        const endpoints = [
+            `https://specieslink.net/api/v1/records/?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`,
+            `https://specieslink.net/v1/records/?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`,
+            `https://api.specieslink.net/v1/records/?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`,
+            `https://api.gbif.org/v1/occurrence/search?scientificName=${encodeURIComponent(speciesName)}&hasCoordinate=true&limit=1000`
+        ];
+
+        let records = [];
+        let fetchedSuccessfully = false;
+        let lastError = null;
+
+        for (const url of endpoints) {
+            try {
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        records = data;
+                    } else if (data.results && Array.isArray(data.results)) {
+                        records = data.results; // GBIF Occurrence format
+                    } else if (data.features && Array.isArray(data.features)) {
+                        records = data.features;
+                    } else if (data.data && Array.isArray(data.data)) {
+                        records = data.data;
+                    } else if (data.records && Array.isArray(data.records)) {
+                        records = data.records;
+                    }
+                    fetchedSuccessfully = true;
+                    break;
+                }
+            } catch (err) {
+                lastError = err;
+                console.warn(`Tentativa em ${url} falhou, tentando próximo endpoint...`, err);
+            }
+        }
+
+        if (!fetchedSuccessfully) {
+            alert(`Não foi possível conectar com as APIs de ocorrência: ${lastError ? lastError.message : 'Falha na rede'}`);
+            btn.innerText = 'Buscar Correspondências';
+            btn.disabled = false;
+            return;
+        }
+
+        let addedCount = 0;
+        const existingSet = new Set(points.map(p => `${p[1].toFixed(6)},${p[0].toFixed(6)}`));
+
+        records.forEach(item => {
+            let lat = null;
+            let lng = null;
+
+            if (item.geometry && item.geometry.coordinates && item.geometry.coordinates.length >= 2) {
+                lng = parseFloat(item.geometry.coordinates[0]);
+                lat = parseFloat(item.geometry.coordinates[1]);
+            } else {
+                const properties = item.properties || item;
+                const rawLat = properties.decimalLatitude || properties.latitude || properties.lat;
+                const rawLng = properties.decimalLongitude || properties.longitude || properties.lng || properties.lon;
+
+                if (rawLat !== undefined && rawLng !== undefined && rawLat !== null && rawLng !== null) {
+                    lat = parseFloat(rawLat);
+                    lng = parseFloat(rawLng);
+                }
+            }
+
+            // Validar coordenadas válidas não-nulas
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && !(lat === 0 && lng === 0)) {
+                const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+                if (!existingSet.has(key)) {
+                    existingSet.add(key);
+                    points.push([lng, lat]); // Turf/Leaflet format: [lng, lat]
+                    addedCount++;
+                }
+            }
+        });
+
+        if (addedCount > 0) {
+            redrawMarkers();
+            if (document.getElementById('coordsModal').style.display === 'flex') {
+                updateModalPointsTable();
+            }
+            alert(`Sucesso! ${addedCount} novas coordenadas da espécie "${speciesName}" foram importadas. Total de coordenadas no projeto: ${points.length}.`);
+        } else if (records.length > 0) {
+            alert(`O servidor retornou registros para "${speciesName}", mas nenhum deles possui coordenadas geográficas válidas.`);
+        } else {
+            alert(`Nenhum registro com coordenadas encontrado para a espécie "${speciesName}".`);
+        }
+
+        btn.innerText = 'Buscar Correspondências';
+        btn.disabled = false;
+    }
 
     // Busca de Região via Nominatim
     async function searchRegion() {
