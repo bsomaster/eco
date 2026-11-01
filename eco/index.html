@@ -509,8 +509,10 @@
             <div id="triangulationControls" style="display: none; margin-top: 8px;">
                 <label for="triangulationMode" style="font-size: 12px; margin-bottom: 4px; display: block;">Modo de Divisão (100 Partes Identicas):</label>
                 <select id="triangulationMode" onchange="triangulateHull()" style="width: 100%; height: 36px; border-radius: 8px; border: 1px solid var(--border); padding: 0 8px; font-size: 13px;">
-                    <option value="concentric">Retopologia Concêntrica (10 Setores x 10 Anéis = 100 Partes Identicas)</option>
-                    <option value="grid">Grade / Mosaico (10 Tiras x 10 Quadrantes = 100 Partes Identicas)</option>
+                    <option value="honeycomb">Favo de Mel / Espiral (100 Células Orgânicas Identicas)</option>
+                    <option value="concentric">Retopologia Concêntrica Grid (10 Setores x 10 Anéis = 100 Partes)</option>
+                    <option value="fem_triangles">Anéis Triangulados FEM (100 Triângulos Concêntricos)</option>
+                    <option value="grid">Grade / Mosaico (10 Tiras x 10 Quadrantes = 100 Partes)</option>
                     <option value="fan">Radial / Leque (100 Fatias de Mesma Área)</option>
                 </select>
             </div>
@@ -1186,7 +1188,80 @@
         return result;
     }
 
-    // Modo 1: Retopologia Concêntrica (10 Setores x 10 Anéis = 100 Partes Identicas)
+    // Modo 1: Favo de Mel / Espiral Concêntrico (100 Células Orgânicas Identicas)
+    function generateHoneycomb100(pts, C) {
+        const n = pts.length;
+        const mainAreas = [];
+        const cumAreas = [0];
+        let totalPlanarArea = 0;
+
+        for (let j = 0; j < n; j++) {
+            const p1 = pts[j];
+            const p2 = pts[(j + 1) % n];
+            const area = 0.5 * Math.abs(C.x * (p1.y - p2.y) + p1.x * (p2.y - C.y) + p2.x * (C.y - p1.y));
+            mainAreas.push(area);
+            totalPlanarArea += area;
+            cumAreas.push(totalPlanarArea);
+        }
+
+        // Células por anel: Centro = 1; Anéis: 6, 12, 18, 24, 39 => Total = 100
+        const ringCounts = [6, 12, 18, 24, 39];
+        const cumRingCells = [1, 7, 19, 37, 61, 100];
+        const ringScales = cumRingCells.map(c => Math.sqrt(c / 100));
+
+        const tiles = [];
+
+        // Célula central (Anel 0)
+        const centerOuterBoundary = pts.map(p => ({
+            x: C.x + ringScales[0] * (p.x - C.x),
+            y: C.y + ringScales[0] * (p.y - C.y)
+        }));
+        tiles.push(centerOuterBoundary);
+
+        // Anéis concêntricos alternados (Anéis 1 a 5)
+        for (let r = 0; r < 5; r++) {
+            const V = ringCounts[r];
+            const sIn = ringScales[r];
+            const sOut = ringScales[r + 1];
+            const targetPerCell = totalPlanarArea / V;
+            const phaseShift = (r % 2 === 1) ? 0.5 * targetPerCell : 0;
+
+            const ringOuterBoundary = [];
+            for (let k = 0; k <= V; k++) {
+                let targetArea = (k * targetPerCell + phaseShift) % totalPlanarArea;
+                ringOuterBoundary.push(getPointAtCumulativeArea(targetArea, pts, C, mainAreas, cumAreas, totalPlanarArea));
+            }
+
+            for (let k = 0; k < V; k++) {
+                const b1 = ringOuterBoundary[k];
+                const b2 = ringOuterBoundary[k + 1];
+                const bPath = getBoundaryPath(b1, b2, pts);
+
+                if (r === 4) {
+                    const innerArc = bPath.map(p => ({
+                        x: C.x + sIn * (p.x - C.x),
+                        y: C.y + sIn * (p.y - C.y)
+                    }));
+                    const outerArc = bPath;
+                    tiles.push([...innerArc, ...outerArc.reverse()]);
+                } else {
+                    const innerArc = bPath.map(p => ({
+                        x: C.x + sIn * (p.x - C.x),
+                        y: C.y + sIn * (p.y - C.y)
+                    }));
+                    const outerArc = bPath.map(p => ({
+                        x: C.x + sOut * (p.x - C.x),
+                        y: C.y + sOut * (p.y - C.y)
+                    }));
+                    tiles.push([...innerArc, ...outerArc.reverse()]);
+                }
+            }
+        }
+
+        return { tiles, totalArea: totalPlanarArea };
+    }
+
+    // Modo 2: Retopologia Concêntrica Grid (10 Setores x 10 Anéis = 100 Partes Identicas)
     function generateConcentric100(pts, C) {
         const n = pts.length;
         const mainAreas = [];
@@ -1256,7 +1331,100 @@
         return { tiles, totalArea: totalPlanarArea };
     }
 
-    // Modo 2: Grade / Mosaico (10 Tiras x 10 Quadrantes = 100 Partes Identicas)
+    // Modo 3: Anéis Triangulados FEM (100 Triângulos Concêntricos)
+    function generateFemTriangles100(pts, C) {
+        const mainAreas = [];
+        const cumAreas = [0];
+        let totalPlanarArea = 0;
+        const n = pts.length;
+
+        for (let j = 0; j < n; j++) {
+            const p1 = pts[j];
+            const p2 = pts[(j + 1) % n];
+            const area = 0.5 * Math.abs(C.x * (p1.y - p2.y) + p1.x * (p2.y - C.y) + p2.x * (C.y - p1.y));
+            mainAreas.push(area);
+            totalPlanarArea += area;
+            cumAreas.push(totalPlanarArea);
+        }
+
+        const ringCounts = [8, 12, 20, 20];
+        const scales = [Math.sqrt(0.08), Math.sqrt(0.28), Math.sqrt(0.60), 1.0];
+
+        const ringVertices = [];
+
+        for (let rIdx = 0; rIdx < 4; rIdx++) {
+            const scale = scales[rIdx];
+            const V = ringCounts[rIdx];
+
+            const scaledPts = pts.map(p => ({
+                x: C.x + scale * (p.x - C.x),
+                y: C.y + scale * (p.y - C.y)
+            }));
+
+            const scaledMainAreas = mainAreas.map(a => a * scale * scale);
+            const scaledCumAreas = cumAreas.map(c => c * scale * scale);
+            const scaledTotalArea = totalPlanarArea * scale * scale;
+
+            const vertices = [];
+            const targetPerVertex = scaledTotalArea / V;
+
+            for (let k = 0; k < V; k++) {
+                const targetArea = k * targetPerVertex;
+                vertices.push(getPointAtCumulativeArea(targetArea, scaledPts, C, scaledMainAreas, scaledCumAreas, scaledTotalArea));
+            }
+            ringVertices.push(vertices);
+        }
+
+        const tiles = [];
+
+        // Ring 0: Centro C para Anel 1 (8 vértices) -> 8 triângulos
+        const R1 = ringVertices[0];
+        for (let k = 0; k < R1.length; k++) {
+            const nextK = (k + 1) % R1.length;
+            tiles.push([C, R1[k], R1[nextK]]);
+        }
+
+        function zipRings(InRing, OutRing, isOuterRing = false) {
+            const Vin = InRing.length;
+            const Vout = OutRing.length;
+            let i = 0, j = 0;
+
+            while (i < Vin || j < Vout) {
+                const pIn = (i + 1) / Vin;
+                const pOut = (j + 1) / Vout;
+
+                if (i < Vin && (j >= Vout || pIn <= pOut)) {
+                    const nextI = (i + 1) % Vin;
+                    const currJ = j % Vout;
+                    tiles.push([InRing[i], InRing[nextI], OutRing[currJ]]);
+                    i++;
+                } else {
+                    const currI = i % Vin;
+                    const nextJ = (j + 1) % Vout;
+                    if (isOuterRing) {
+                        const bPath = getBoundaryPath(OutRing[j], OutRing[nextJ], pts);
+                        tiles.push([InRing[currI], ...bPath]);
+                    } else {
+                        tiles.push([InRing[currI], OutRing[j], OutRing[nextJ]]);
+                    }
+                    j++;
+                }
+            }
+        }
+
+        // Ring 1: 8 inner + 12 outer -> 20 triângulos
+        zipRings(ringVertices[0], ringVertices[1], false);
+
+        // Ring 2: 12 inner + 20 outer -> 32 triângulos
+        zipRings(ringVertices[1], ringVertices[2], false);
+
+        // Ring 3: 20 inner + 20 outer -> 40 triângulos
+        zipRings(ringVertices[2], ringVertices[3], true);
+
+        return { tiles, totalArea: totalPlanarArea };
+    }
+
+    // Modo 4: Grade / Mosaico (10 Tiras x 10 Quadrantes = 100 Partes Identicas)
     function generateGrid100(pts, C) {
         const totalPlanarArea = getPolygonShoelaceArea(pts);
         const targetAreaPerStrip = totalPlanarArea / 10;
@@ -1339,7 +1507,7 @@
         return { tiles, totalArea: totalPlanarArea };
     }
 
-    // Modo 3: Radial / Leque (100 Fatias de Mesma Área)
+    // Modo 5: Radial / Leque (100 Fatias de Mesma Área)
     function generateRadialFan100(pts, C) {
         const n = pts.length;
         const mainAreas = [];
@@ -1396,10 +1564,14 @@
         pts = ensureCounterClockwise(pts);
         const C = getPolygonCentroid(pts);
 
-        const mode = document.getElementById('triangulationMode') ? document.getElementById('triangulationMode').value : 'concentric';
+        const mode = document.getElementById('triangulationMode') ? document.getElementById('triangulationMode').value : 'honeycomb';
 
         let res;
-        if (mode === 'grid') {
+        if (mode === 'honeycomb') {
+            res = generateHoneycomb100(pts, C);
+        } else if (mode === 'fem_triangles') {
+            res = generateFemTriangles100(pts, C);
+        } else if (mode === 'grid') {
             res = generateGrid100(pts, C);
         } else if (mode === 'fan') {
             res = generateRadialFan100(pts, C);
