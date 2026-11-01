@@ -507,13 +507,10 @@
             <button id="btnTriangulate" class="success" onclick="triangulateHull()" style="display: none; margin-top: 8px; background: #8e24aa;">Dividir em 100 Partes Identicas</button>
 
             <div id="triangulationControls" style="display: none; margin-top: 8px;">
-                <label for="triangulationMode" style="font-size: 12px; margin-bottom: 4px; display: block;">Modo de Divisão (100 Partes Identicas):</label>
+                <label for="triangulationMode" style="font-size: 12px; margin-bottom: 4px; display: block;">Modo de Divisão (100 Partes):</label>
                 <select id="triangulationMode" onchange="triangulateHull()" style="width: 100%; height: 36px; border-radius: 8px; border: 1px solid var(--border); padding: 0 8px; font-size: 13px;">
-                    <option value="honeycomb">Favo de Mel / Espiral (100 Células Orgânicas Identicas)</option>
-                    <option value="concentric">Retopologia Concêntrica Grid (10 Setores x 10 Anéis = 100 Partes)</option>
-                    <option value="fem_triangles">Anéis Triangulados FEM (100 Triângulos Concêntricos)</option>
-                    <option value="grid">Grade / Mosaico (10 Tiras x 10 Quadrantes = 100 Partes)</option>
-                    <option value="fan">Radial / Leque (100 Fatias de Mesma Área)</option>
+                    <option value="honeycomb">Espiral em Favo</option>
+                    <option value="concentric">Retopologia Concêntrica</option>
                 </select>
             </div>
 
@@ -522,6 +519,18 @@
                     <div class="metric-label">Área Média de Cada Parte</div>
                     <div class="metric-value"><span id="triAreaUnit">0</span> m²</div>
                     <div class="hint">Polígono 100% preenchido (100 partes de área equivalente)</div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px;">
+                    <div class="metric-label">Dispersão dos Pontos na EOO (Ocupação)</div>
+                    <div class="metric-value" style="color: #34a853;">
+                        <span id="triOccupiedCount">0</span> / 100 partes (<span id="triOccupiedPercent">0</span>%)
+                    </div>
+                    <div class="hint" style="margin-top: 4px; line-height: 1.4;">
+                        • Partes Ocupadas com Registro: <b id="triOccupiedDetail" style="color: #2d8a47;">0</b><br>
+                        • Partes Vazias sem Registro: <span id="triEmptyCount">100</span><br>
+                        • Classificação da Dispersão: <b id="triDispersionClass">-</b>
+                    </div>
                 </div>
 
                 <div style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px;">
@@ -1331,218 +1340,6 @@
         return { tiles, totalArea: totalPlanarArea };
     }
 
-    // Modo 3: Anéis Triangulados FEM (100 Triângulos Concêntricos)
-    function generateFemTriangles100(pts, C) {
-        const mainAreas = [];
-        const cumAreas = [0];
-        let totalPlanarArea = 0;
-        const n = pts.length;
-
-        for (let j = 0; j < n; j++) {
-            const p1 = pts[j];
-            const p2 = pts[(j + 1) % n];
-            const area = 0.5 * Math.abs(C.x * (p1.y - p2.y) + p1.x * (p2.y - C.y) + p2.x * (C.y - p1.y));
-            mainAreas.push(area);
-            totalPlanarArea += area;
-            cumAreas.push(totalPlanarArea);
-        }
-
-        const ringCounts = [8, 12, 20, 20];
-        const scales = [Math.sqrt(0.08), Math.sqrt(0.28), Math.sqrt(0.60), 1.0];
-
-        const ringVertices = [];
-
-        for (let rIdx = 0; rIdx < 4; rIdx++) {
-            const scale = scales[rIdx];
-            const V = ringCounts[rIdx];
-
-            const scaledPts = pts.map(p => ({
-                x: C.x + scale * (p.x - C.x),
-                y: C.y + scale * (p.y - C.y)
-            }));
-
-            const scaledMainAreas = mainAreas.map(a => a * scale * scale);
-            const scaledCumAreas = cumAreas.map(c => c * scale * scale);
-            const scaledTotalArea = totalPlanarArea * scale * scale;
-
-            const vertices = [];
-            const targetPerVertex = scaledTotalArea / V;
-
-            for (let k = 0; k < V; k++) {
-                const targetArea = k * targetPerVertex;
-                vertices.push(getPointAtCumulativeArea(targetArea, scaledPts, C, scaledMainAreas, scaledCumAreas, scaledTotalArea));
-            }
-            ringVertices.push(vertices);
-        }
-
-        const tiles = [];
-
-        // Ring 0: Centro C para Anel 1 (8 vértices) -> 8 triângulos
-        const R1 = ringVertices[0];
-        for (let k = 0; k < R1.length; k++) {
-            const nextK = (k + 1) % R1.length;
-            tiles.push([C, R1[k], R1[nextK]]);
-        }
-
-        function zipRings(InRing, OutRing, isOuterRing = false) {
-            const Vin = InRing.length;
-            const Vout = OutRing.length;
-            let i = 0, j = 0;
-
-            while (i < Vin || j < Vout) {
-                const pIn = (i + 1) / Vin;
-                const pOut = (j + 1) / Vout;
-
-                if (i < Vin && (j >= Vout || pIn <= pOut)) {
-                    const nextI = (i + 1) % Vin;
-                    const currJ = j % Vout;
-                    tiles.push([InRing[i], InRing[nextI], OutRing[currJ]]);
-                    i++;
-                } else {
-                    const currI = i % Vin;
-                    const nextJ = (j + 1) % Vout;
-                    if (isOuterRing) {
-                        const bPath = getBoundaryPath(OutRing[j], OutRing[nextJ], pts);
-                        tiles.push([InRing[currI], ...bPath]);
-                    } else {
-                        tiles.push([InRing[currI], OutRing[j], OutRing[nextJ]]);
-                    }
-                    j++;
-                }
-            }
-        }
-
-        // Ring 1: 8 inner + 12 outer -> 20 triângulos
-        zipRings(ringVertices[0], ringVertices[1], false);
-
-        // Ring 2: 12 inner + 20 outer -> 32 triângulos
-        zipRings(ringVertices[1], ringVertices[2], false);
-
-        // Ring 3: 20 inner + 20 outer -> 40 triângulos
-        zipRings(ringVertices[2], ringVertices[3], true);
-
-        return { tiles, totalArea: totalPlanarArea };
-    }
-
-    // Modo 4: Grade / Mosaico (10 Tiras x 10 Quadrantes = 100 Partes Identicas)
-    function generateGrid100(pts, C) {
-        const totalPlanarArea = getPolygonShoelaceArea(pts);
-        const targetAreaPerStrip = totalPlanarArea / 10;
-
-        let minY = Infinity, maxY = -Infinity;
-        pts.forEach(p => {
-            if (p.y < minY) minY = p.y;
-            if (p.y > maxY) maxY = p.y;
-        });
-
-        const yCuts = [minY];
-        for (let s = 1; s < 10; s++) {
-            const targetCumArea = s * targetAreaPerStrip;
-            let low = yCuts[s - 1];
-            let high = maxY;
-
-            for (let iter = 0; iter < 25; iter++) {
-                const mid = (low + high) / 2;
-                const clipped = clipPolygonBelowY(pts, mid);
-                const area = getPolygonShoelaceArea(clipped);
-                if (area < targetCumArea) {
-                    low = mid;
-                } else {
-                    high = mid;
-                }
-            }
-            yCuts.push((low + high) / 2);
-        }
-        yCuts.push(maxY);
-
-        const tiles = [];
-
-        for (let s = 0; s < 10; s++) {
-            const y1 = yCuts[s];
-            const y2 = yCuts[s + 1];
-
-            const stripPoly = clipPolygonAboveY(clipPolygonBelowY(pts, y2), y1);
-            if (stripPoly.length < 3) continue;
-
-            let minX = Infinity, maxX = -Infinity;
-            stripPoly.forEach(p => {
-                if (p.x < minX) minX = p.x;
-                if (p.x > maxX) maxX = p.x;
-            });
-
-            const stripTotalArea = getPolygonShoelaceArea(stripPoly);
-            const targetPerCellInStrip = stripTotalArea / 10;
-
-            const xCuts = [minX];
-            for (let c = 1; c < 10; c++) {
-                const targetCumStripArea = c * targetPerCellInStrip;
-                let low = xCuts[c - 1];
-                let high = maxX;
-
-                for (let iter = 0; iter < 25; iter++) {
-                    const mid = (low + high) / 2;
-                    const clippedLeft = clipPolygonLeftOfX(stripPoly, mid);
-                    const areaLeft = getPolygonShoelaceArea(clippedLeft);
-                    if (areaLeft < targetCumStripArea) {
-                        low = mid;
-                    } else {
-                        high = mid;
-                    }
-                }
-                xCuts.push((low + high) / 2);
-            }
-            xCuts.push(maxX);
-
-            for (let c = 0; c < 10; c++) {
-                const x1 = xCuts[c];
-                const x2 = xCuts[c + 1];
-
-                const tilePoly = clipPolygonRightOfX(clipPolygonLeftOfX(stripPoly, x2), x1);
-                if (tilePoly.length >= 3) {
-                    tiles.push(tilePoly);
-                }
-            }
-        }
-
-        return { tiles, totalArea: totalPlanarArea };
-    }
-
-    // Modo 5: Radial / Leque (100 Fatias de Mesma Área)
-    function generateRadialFan100(pts, C) {
-        const n = pts.length;
-        const mainAreas = [];
-        const cumAreas = [0];
-        let totalPlanarArea = 0;
-
-        for (let j = 0; j < n; j++) {
-            const p1 = pts[j];
-            const p2 = pts[(j + 1) % n];
-            const area = 0.5 * Math.abs(C.x * (p1.y - p2.y) + p1.x * (p2.y - C.y) + p2.x * (C.y - p1.y));
-            mainAreas.push(area);
-            totalPlanarArea += area;
-            cumAreas.push(totalPlanarArea);
-        }
-
-        const N = 100;
-        const targetPlanarPerTri = totalPlanarArea / N;
-
-        const boundaryPts = [];
-        for (let i = 0; i < N; i++) {
-            const targetArea = i * targetPlanarPerTri;
-            boundaryPts.push(getPointAtCumulativeArea(targetArea, pts, C, mainAreas, cumAreas, totalPlanarArea));
-        }
-
-        const tiles = [];
-        for (let i = 0; i < N; i++) {
-            const b1 = boundaryPts[i];
-            const b2 = boundaryPts[(i + 1) % N];
-            const bPath = getBoundaryPath(b1, b2, pts);
-            tiles.push([C, ...bPath]);
-        }
-
-        return { tiles, totalArea: totalPlanarArea };
-    }
-
     function triangulateHull() {
         if (!currentHullGeoJSON) {
             alert('Por favor, calcule o polígono convexo primeiro.');
@@ -1569,12 +1366,6 @@
         let res;
         if (mode === 'honeycomb') {
             res = generateHoneycomb100(pts, C);
-        } else if (mode === 'fem_triangles') {
-            res = generateFemTriangles100(pts, C);
-        } else if (mode === 'grid') {
-            res = generateGrid100(pts, C);
-        } else if (mode === 'fan') {
-            res = generateRadialFan100(pts, C);
         } else {
             res = generateConcentric100(pts, C);
         }
@@ -1585,38 +1376,96 @@
         let minTileArea = Infinity;
         let maxTileArea = -Infinity;
 
+        // Pré-converter pontos e polígonos das células para Turf.js
+        const turfPoints = points.map(p => turf.point(p));
+        const tilePolygonsGeoJSON = tiles.map(tile => {
+            const turfCoords = tile.map(p => {
+                const ll = L.CRS.EPSG3857.unproject(L.point(p.x, p.y));
+                return [ll.lng, ll.lat];
+            });
+            turfCoords.push(turfCoords[0]);
+            return turf.polygon([turfCoords]);
+        });
+
+        // Garantir atribuição ÚNICA de cada ponto a no máximo 1 célula (sem dupla contagem em fronteiras)
+        const assignedPointIndices = new Set();
+        const tilePointCounts = new Array(tiles.length).fill(0);
+
+        turfPoints.forEach((pt, pIdx) => {
+            for (let tIdx = 0; tIdx < tiles.length; tIdx++) {
+                if (turf.booleanPointInPolygon(pt, tilePolygonsGeoJSON[tIdx])) {
+                    tilePointCounts[tIdx]++;
+                    assignedPointIndices.add(pIdx);
+                    break; // Atribuído exclusivamente a esta área! Não será contado em nenhuma outra.
+                }
+            }
+        });
+
+        // Atribuir pontos de borda exata que não foram capturados por booleanPointInPolygon à célula mais próxima
+        turfPoints.forEach((pt, pIdx) => {
+            if (!assignedPointIndices.has(pIdx)) {
+                let minDistance = Infinity;
+                let closestTileIdx = 0;
+                tiles.forEach((tile, tIdx) => {
+                    const center = turf.centroid(tilePolygonsGeoJSON[tIdx]);
+                    const dist = turf.distance(pt, center);
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        closestTileIdx = tIdx;
+                    }
+                });
+                tilePointCounts[closestTileIdx]++;
+                assignedPointIndices.add(pIdx);
+            }
+        });
+
+        let occupiedTilesCount = 0;
+
         tiles.forEach((tile, idx) => {
             const leafletLatLngs = [];
-            const turfCoords = [];
-
             tile.forEach(p => {
                 const ll = L.CRS.EPSG3857.unproject(L.point(p.x, p.y));
                 leafletLatLngs.push([ll.lat, ll.lng]);
-                turfCoords.push([ll.lng, ll.lat]);
             });
-            turfCoords.push(turfCoords[0]);
 
-            const tilePolygonGeoJSON = turf.polygon([turfCoords]);
+            const tilePolygonGeoJSON = tilePolygonsGeoJSON[idx];
             const tileGeodesicArea = turf.area(tilePolygonGeoJSON);
             sumTrianglesGeodesicArea += tileGeodesicArea;
 
             if (tileGeodesicArea < minTileArea) minTileArea = tileGeodesicArea;
             if (tileGeodesicArea > maxTileArea) maxTileArea = tileGeodesicArea;
 
+            const containedPointsCount = tilePointCounts[idx];
+            const isOccupied = containedPointsCount > 0;
+            if (isOccupied) occupiedTilesCount++;
+
             const poly = L.polygon(leafletLatLngs, {
-                color: '#8e24aa',
-                weight: 1.5,
+                color: isOccupied ? '#1e8e3e' : '#8e24aa',
+                weight: isOccupied ? 2 : 1,
                 opacity: 0.85,
-                fillColor: (idx % 2 === 0) ? '#ab47bc' : '#ce93d8',
-                fillOpacity: 0.4
+                fillColor: isOccupied ? '#34a853' : (idx % 2 === 0 ? '#ab47bc' : '#ce93d8'),
+                fillOpacity: isOccupied ? 0.60 : 0.25
             }).addTo(trianglesLayer);
 
-            poly.bindTooltip(`<b>Parte #${idx + 1}</b><br>Área: ${tileGeodesicArea.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²`, {
+            const statusText = isOccupied ? `<span style="color:#2d8a47; font-weight:bold;">OCUPADA (${containedPointsCount} ponto${containedPointsCount > 1 ? 's' : ''})</span>` : '<span style="color:#8e24aa;">Vazia</span>';
+            poly.bindTooltip(`<b>Parte #${idx + 1} - ${statusText}</b><br>Área: ${tileGeodesicArea.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²`, {
                 sticky: true
             });
         });
 
-        const avgUnitArea = sumTrianglesGeodesicArea / tiles.length;
+        const totalTiles = tiles.length;
+        const emptyTilesCount = totalTiles - occupiedTilesCount;
+        const occupiedPercent = totalTiles > 0 ? (occupiedTilesCount / totalTiles) * 100 : 0;
+
+        // Classificação da Dispersão Espacial dos Pontos na EOO
+        let dispersionClass = "";
+        if (occupiedPercent <= 20) dispersionClass = "Muito Alta Concentração (Baixa Dispersão)";
+        else if (occupiedPercent <= 40) dispersionClass = "Concentrada / Pouco Dispersa";
+        else if (occupiedPercent <= 60) dispersionClass = "Moderadamente Dispersa";
+        else if (occupiedPercent <= 80) dispersionClass = "Alta Dispersão na EOO";
+        else dispersionClass = "Homogênea em Toda a EOO";
+
+        const avgUnitArea = sumTrianglesGeodesicArea / totalTiles;
         const diffMaxMin = maxTileArea - minTileArea;
         const diffMaxMinPercent = avgUnitArea > 0 ? (diffMaxMin / avgUnitArea) * 100 : 0;
 
@@ -1626,6 +1475,12 @@
         document.getElementById('triErrorPercent').innerText = diffMaxMinPercent.toLocaleString('pt-BR', {maximumFractionDigits: 2});
         if (document.getElementById('triAreaMin')) document.getElementById('triAreaMin').innerText = minTileArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
         if (document.getElementById('triAreaMax')) document.getElementById('triAreaMax').innerText = maxTileArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+
+        if (document.getElementById('triOccupiedCount')) document.getElementById('triOccupiedCount').innerText = occupiedTilesCount;
+        if (document.getElementById('triOccupiedPercent')) document.getElementById('triOccupiedPercent').innerText = occupiedPercent.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+        if (document.getElementById('triOccupiedDetail')) document.getElementById('triOccupiedDetail').innerText = `${occupiedTilesCount} de ${totalTiles} partes (${occupiedPercent.toFixed(1)}% da EOO)`;
+        if (document.getElementById('triEmptyCount')) document.getElementById('triEmptyCount').innerText = `${emptyTilesCount} de ${totalTiles} partes (${(100 - occupiedPercent).toFixed(1)}%)`;
+        if (document.getElementById('triDispersionClass')) document.getElementById('triDispersionClass').innerHTML = dispersionClass;
 
         document.getElementById('triangulationResult').style.display = 'block';
         document.getElementById('triangulationControls').style.display = 'block';
