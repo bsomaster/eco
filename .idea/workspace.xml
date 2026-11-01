@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c32ff435-1f79-4189-bc00-a646911b15f1" name="Changes" comment="Alteração de pastas">
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;bsomaster&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/bsomaster/eco.git&quot;,
+    &quot;accountId&quot;: &quot;e63657b1-df01-4494-b6ed-a2fdf67a3aab&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3IABw7izqDMM0OQ2TqdEhVAAFSi" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Projetos/Ecologia&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  }
+}</component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c32ff435-1f79-4189-bc00-a646911b15f1" name="Changes" comment="" />
+      <created>1787197727427</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1787197727427</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Init Version">
+      <option name="closed" value="true" />
+      <created>1787354648974</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1787354648974</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Melhores correspondências">
+      <option name="closed" value="true" />
+      <created>1787355391279</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1787355391279</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Visão de Satélite e relevo">
+      <option name="closed" value="true" />
+      <created>1787356053544</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1787356053544</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Triângulos">
+      <option name="closed" value="true" />
+      <created>1793488625130</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1793488625130</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Retopologia Concêntrica">
+      <option name="closed" value="true" />
+      <created>1793505748063</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1793505748063</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Divisão: Favo de mel">
+      <option name="closed" value="true" />
+      <created>1793507485048</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1793507485048</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Modos de divisão">
+      <option name="closed" value="true" />
+      <created>1793510441855</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1793510441855</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Busca inicial">
+      <option name="closed" value="true" />
+      <created>1793511710262</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1793511710262</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Divisão de fontes">
+      <option name="closed" value="true" />
+      <created>1793553445775</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1793553445775</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Alteração de pastas">
+      <option name="closed" value="true" />
+      <created>1793553760452</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1793553760452</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Alteração de pastas">
+      <option name="closed" value="true" />
+      <created>1793553824091</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1793553824091</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Init Version" />
+    <MESSAGE value="Melhores correspondências" />
+    <MESSAGE value="Visão de Satélite e relevo" />
+    <MESSAGE value="Triângulos" />
+    <MESSAGE value="Retopologia Concêntrica" />
+    <MESSAGE value="Divisão: Favo de mel" />
+    <MESSAGE value="Modos de divisão" />
+    <MESSAGE value="Busca inicial" />
+    <MESSAGE value="Divisão de fontes" />
+    <MESSAGE value="Alteração de pastas" />
+    <option name="LAST_COMMIT_MESSAGE" value="Alteração de pastas" />
+  </component>
+</project>

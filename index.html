@@ -749,21 +749,31 @@
     }
 
     async function fetchFromEndpoints(urls) {
-        for (const url of urls) {
-            try {
-                const res = await fetch(url);
-                if (res.ok) {
-                    const data = await res.json();
-                    let recs = [];
-                    if (Array.isArray(data)) recs = data;
-                    else if (data.results && Array.isArray(data.results)) recs = data.results;
-                    else if (data.features && Array.isArray(data.features)) recs = data.features;
-                    else if (data.data && Array.isArray(data.data)) recs = data.data;
-                    else if (data.records && Array.isArray(data.records)) recs = data.records;
-                    return recs;
+        for (const rawUrl of urls) {
+            // Tenta requisição direta e, se houver bloqueio de CORS no navegador (comum em localhost), tenta via proxies CORS públicos
+            const urlsToTry = [
+                rawUrl,
+                `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`
+            ];
+
+            for (const url of urlsToTry) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const data = await res.json();
+                        let recs = null;
+                        if (Array.isArray(data)) recs = data;
+                        else if (data.results && Array.isArray(data.results)) recs = data.results;
+                        else if (data.features && Array.isArray(data.features)) recs = data.features;
+                        else if (data.data && Array.isArray(data.data)) recs = data.data;
+                        else if (data.records && Array.isArray(data.records)) recs = data.records;
+
+                        if (recs !== null) return recs;
+                    }
+                } catch (err) {
+                    console.warn(`Tentativa de acesso em ${url} falhou:`, err);
                 }
-            } catch (err) {
-                console.warn(`Tentativa em ${url} falhou:`, err);
             }
         }
         return null;
@@ -784,7 +794,7 @@
         const speciesLinkEndpoints = [
             `https://specieslink.net/api/v1/records/?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`,
             `https://specieslink.net/v1/records/?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`,
-            `https://api.specieslink.net/v1/records/?scientificName=${encodeURIComponent(speciesName)}&apikey=${SPECIESLINK_API_KEY}`
+            `https://api.splink.org.br/records/scientificName/${encodeURIComponent(speciesName)}`
         ];
 
         const gbifEndpoints = [
@@ -819,7 +829,7 @@
         }
 
         if (!fetchedSuccessfully) {
-            alert(`Não foi possível conectar com a fonte de dados selecionada (${sourceLabel}). Verifique a conexão.`);
+            alert(`Não foi possível conectar com a fonte de dados selecionada (${sourceLabel}). Se o servidor estiver temporariamente indisponível, você pode alterar a opção "Fonte de Coordenadas" para "GBIF" ou "Ambas".`);
             btn.innerText = 'Buscar Correspondências';
             btn.disabled = false;
             return;
