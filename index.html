@@ -478,9 +478,9 @@
             <div class="input-box" style="margin-top: 8px;">
                 <label for="speciesSourceSelect">Fonte de Coordenadas</label>
                 <select id="speciesSourceSelect" style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid var(--border); padding: 0 12px; font-size: 14px; outline: none; background: #fff;">
-                    <option value="specieslink">speciesLink</option>
+                    <option value="specieslink">SpeciesLink</option>
                     <option value="gbif">GBIF</option>
-                    <option value="both">Ambas (speciesLink + GBIF)</option>
+                    <option value="both">Ambas</option>
                 </select>
             </div>
             <button id="btnSearchSpecies" onclick="searchSpeciesName()" style="margin-top: 8px;">Buscar Correspondências</button>
@@ -522,50 +522,40 @@
                 <div class="hint"><span id="occurrenceRatePercent">0</span>% da área selecionada</div>
             </div>
 
-            <button id="btnTriangulate" class="success" onclick="triangulateHull()" style="display: none; margin-top: 8px; background: #8e24aa;">Dividir em 100 Partes Identicas</button>
-
-            <div id="triangulationControls" style="display: none; margin-top: 8px;">
-                <label for="triangulationMode" style="font-size: 12px; margin-bottom: 4px; display: block;">Modo de Divisão (100 Partes):</label>
-                <select id="triangulationMode" onchange="triangulateHull()" style="width: 100%; height: 36px; border-radius: 8px; border: 1px solid var(--border); padding: 0 8px; font-size: 13px;">
-                    <option value="honeycomb">Espiral em Favo</option>
-                    <option value="concentric">Retopologia Concêntrica</option>
+            <div id="dispersionAnalysisSection" style="display: none; margin-top: 16px;">
+                <div class="section-title">Análise de Dispersão na EOO</div>
+                <label for="dispersionMethodSelect" style="font-size: 12px; font-weight: 600; margin-bottom: 6px; display: block;">Método de Avaliação:</label>
+                <select id="dispersionMethodSelect" onchange="runSelectedDispersionMethod()" style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid var(--border); padding: 0 10px; font-size: 13px; outline: none; background: #fff;">
+                    <option value="parts100">1. Divisão em 100 Partes Idênticas</option>
+                    <option value="voronoi">2. Polígonos de Voronoi (Tesselação)</option>
+                    <option value="clark_evans">3. Índice de Clark-Evans (Vizinho Mais Próximo)</option>
+                    <option value="grid_iucn">4. Grid de Quadrantes Fixos (Padrão IUCN)</option>
+                    <option value="mst">5. Árvore Geradora Mínima (MST)</option>
+                    <option value="ripley_k">6. Função K de Ripley (Análise Multiescala)</option>
                 </select>
+
+                <div id="triangulationControls" style="display: none; margin-top: 8px;">
+                    <label for="triangulationMode" style="font-size: 12px; margin-bottom: 4px; display: block;">Modo de Divisão (100 Partes):</label>
+                    <select id="triangulationMode" onchange="runSelectedDispersionMethod()" style="width: 100%; height: 36px; border-radius: 8px; border: 1px solid var(--border); padding: 0 8px; font-size: 13px;">
+                        <option value="honeycomb">Espiral em Favo</option>
+                        <option value="concentric">Retopologia Concêntrica</option>
+                    </select>
+                </div>
+
+                <button id="btnRunDispersion" class="success" onclick="runSelectedDispersionMethod()" style="margin-top: 8px; background: #8e24aa;">Analisar Dispersão Espacial</button>
             </div>
 
-            <div id="triangulationResult" class="result-card" style="display: none;">
-                <div style="margin-bottom: 8px;">
-                    <div class="metric-label">Área Média de Cada Parte</div>
-                    <div class="metric-value"><span id="triAreaUnit">0</span> m²</div>
-                    <div class="hint">Polígono 100% preenchido (100 partes de área equivalente)</div>
-                </div>
+            <!-- Card de Resultado da Análise de Dispersão -->
+            <div id="dispersionResultCard" class="result-card" style="display: none; margin-top: 12px;">
+                <div class="metric-label" style="text-transform: uppercase; letter-spacing: 0.5px;">Resultado da Dispersão</div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--dark); margin-top: 2px;" id="dispersionMethodTitle">-</div>
 
                 <div style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px;">
-                    <div class="metric-label">Dispersão dos Pontos na EOO (Ocupação)</div>
-                    <div class="metric-value" style="color: #34a853;">
-                        <span id="triOccupiedCount">0</span> / 100 partes (<span id="triOccupiedPercent">0</span>%)
-                    </div>
-                    <div class="hint" style="margin-top: 4px; line-height: 1.4;">
-                        • Partes Ocupadas com Registro: <b id="triOccupiedDetail" style="color: #2d8a47;">0</b><br>
-                        • Partes Vazias sem Registro: <span id="triEmptyCount">100</span><br>
-                        • Classificação da Dispersão: <b id="triDispersionClass">-</b>
-                    </div>
+                    <div class="metric-label">Classificação da Dispersão na EOO</div>
+                    <div class="metric-value" id="dispersionClassLabel" style="font-size: 18px; color: #1a73e8;">-</div>
                 </div>
 
-                <div style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px;">
-                    <div class="metric-label">Soma da Área das 100 Partes</div>
-                    <div class="metric-value" style="font-size: 15px;"><span id="triAreaSum">0</span> m² (100% da EOO)</div>
-                </div>
-
-                <div style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px;">
-                    <div class="metric-label">Diferença de Área entre as Partes</div>
-                    <div class="metric-value" style="font-size: 15px; color: #1a73e8;">
-                        &plusmn;<span id="triErrorMargin">0</span> m² (<span id="triErrorPercent">0</span>%)
-                    </div>
-                    <div class="hint" style="margin-top: 4px; line-height: 1.4;">
-                        Variação de área (precisão do cálculo: 100% homogêneo).<br>
-                        • Menor parte: <span id="triAreaMin">0</span> m²<br>
-                        • Maior parte: <span id="triAreaMax">0</span> m²
-                    </div>
+                <div id="dispersionMetricsContent" style="border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; font-size: 12px; line-height: 1.5;">
                 </div>
             </div>
 
@@ -1188,7 +1178,7 @@
             currentHullGeoJSON = hull;
             hullLayer.clearLayers();
             trianglesLayer.clearLayers();
-            document.getElementById('triangulationResult').style.display = 'none';
+            if (document.getElementById('dispersionResultCard')) document.getElementById('dispersionResultCard').style.display = 'none';
 
             L.geoJSON(hull, {
                 style: {
@@ -1202,7 +1192,12 @@
             const area = turf.area(hull);
             document.getElementById('hullArea').innerText = area.toLocaleString('pt-BR');
             document.getElementById('hullResult').style.display = 'block';
-            document.getElementById('btnTriangulate').style.display = 'block';
+
+            // Mostrar seção de análise de dispersão
+            if (document.getElementById('dispersionAnalysisSection')) {
+                document.getElementById('dispersionAnalysisSection').style.display = 'block';
+                runSelectedDispersionMethod();
+            }
 
             // Cálculo da Taxa de Ocorrência
             if (regionGeoJSON) {
@@ -1579,13 +1574,63 @@
         return { tiles, totalArea: totalPlanarArea };
     }
 
-    function triangulateHull() {
+    function getUniqueValidPoints() {
+        const uniquePtsMap = new Map();
+        points.forEach(p => {
+            if (Array.isArray(p) && p.length >= 2 && p[0] != null && p[1] != null && !isNaN(p[0]) && !isNaN(p[1])) {
+                const lng = Number(p[0]);
+                const lat = Number(p[1]);
+                const key = `${lng.toFixed(6)},${lat.toFixed(6)}`;
+                if (!uniquePtsMap.has(key)) {
+                    uniquePtsMap.set(key, [lng, lat]);
+                }
+            }
+        });
+        return Array.from(uniquePtsMap.values());
+    }
+
+    function getDispersionColor(classification) {
+        if (classification.includes("Muito Baixa")) return "#ea4335";
+        if (classification.includes("Baixa")) return "#e65100";
+        if (classification.includes("Moderada")) return "#1a73e8";
+        if (classification.includes("Muito Alta")) return "#2d8a47";
+        if (classification.includes("Alta")) return "#34a853";
+        return "#1a73e8";
+    }
+
+    function runSelectedDispersionMethod() {
         if (!currentHullGeoJSON) {
             alert('Por favor, calcule o polígono convexo primeiro.');
             return;
         }
 
         trianglesLayer.clearLayers();
+        const methodSelect = document.getElementById('dispersionMethodSelect');
+        const method = methodSelect ? methodSelect.value : 'parts100';
+        const triControls = document.getElementById('triangulationControls');
+
+        if (method === 'parts100') {
+            if (triControls) triControls.style.display = 'block';
+            runParts100Method();
+        } else {
+            if (triControls) triControls.style.display = 'none';
+            if (method === 'voronoi') runVoronoiMethod();
+            else if (method === 'clark_evans') runClarkEvansMethod();
+            else if (method === 'grid_iucn') runGridIucnMethod();
+            else if (method === 'mst') runMstMethod();
+            else if (method === 'ripley_k') runRipleyKMethod();
+        }
+        if (document.getElementById('dispersionResultCard')) {
+            document.getElementById('dispersionResultCard').style.display = 'block';
+        }
+    }
+
+    function runParts100Method() {
+        triangulateHull();
+    }
+
+    function triangulateHull() {
+        if (!currentHullGeoJSON) return;
 
         let coords = currentHullGeoJSON.geometry.coordinates[0];
         if (coords.length > 1 && coords[0][0] === coords[coords.length - 1][0] && coords[0][1] === coords[coords.length - 1][1]) {
@@ -1611,11 +1656,9 @@
 
         const tiles = res.tiles;
         let sumTrianglesGeodesicArea = 0;
-
         let minTileArea = Infinity;
         let maxTileArea = -Infinity;
 
-        // Pré-converter pontos e polígonos das células para Turf.js
         const turfPoints = points.map(p => turf.point(p));
         const tilePolygonsGeoJSON = tiles.map(tile => {
             const turfCoords = tile.map(p => {
@@ -1626,7 +1669,6 @@
             return turf.polygon([turfCoords]);
         });
 
-        // Garantir atribuição ÚNICA de cada ponto a no máximo 1 célula (sem dupla contagem em fronteiras)
         const assignedPointIndices = new Set();
         const tilePointCounts = new Array(tiles.length).fill(0);
 
@@ -1635,12 +1677,11 @@
                 if (turf.booleanPointInPolygon(pt, tilePolygonsGeoJSON[tIdx])) {
                     tilePointCounts[tIdx]++;
                     assignedPointIndices.add(pIdx);
-                    break; // Atribuído exclusivamente a esta área! Não será contado em nenhuma outra.
+                    break;
                 }
             }
         });
 
-        // Atribuir pontos de borda exata que não foram capturados por booleanPointInPolygon à célula mais próxima
         turfPoints.forEach((pt, pIdx) => {
             if (!assignedPointIndices.has(pIdx)) {
                 let minDistance = Infinity;
@@ -1696,37 +1737,397 @@
         const emptyTilesCount = totalTiles - occupiedTilesCount;
         const occupiedPercent = totalTiles > 0 ? (occupiedTilesCount / totalTiles) * 100 : 0;
 
-        // Classificação da Dispersão Espacial dos Pontos na EOO
         let dispersionClass = "";
-        if (occupiedPercent <= 20) dispersionClass = "Muito Alta Concentração (Baixa Dispersão)";
-        else if (occupiedPercent <= 40) dispersionClass = "Concentrada / Pouco Dispersa";
-        else if (occupiedPercent <= 60) dispersionClass = "Moderadamente Dispersa";
+        if (occupiedPercent <= 20) dispersionClass = "Muito Baixa Dispersão (Muito Concentrada)";
+        else if (occupiedPercent <= 40) dispersionClass = "Baixa Dispersão (Concentrada)";
+        else if (occupiedPercent <= 60) dispersionClass = "Moderada Dispersão";
         else if (occupiedPercent <= 80) dispersionClass = "Alta Dispersão na EOO";
-        else dispersionClass = "Homogênea em Toda a EOO";
+        else dispersionClass = "Muito Alta Dispersão (Homogênea)";
 
         const avgUnitArea = sumTrianglesGeodesicArea / totalTiles;
         const diffMaxMin = maxTileArea - minTileArea;
         const diffMaxMinPercent = avgUnitArea > 0 ? (diffMaxMin / avgUnitArea) * 100 : 0;
 
-        document.getElementById('triAreaUnit').innerText = avgUnitArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
-        document.getElementById('triAreaSum').innerText = sumTrianglesGeodesicArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
-        document.getElementById('triErrorMargin').innerText = diffMaxMin.toLocaleString('pt-BR', {maximumFractionDigits: 1});
-        document.getElementById('triErrorPercent').innerText = diffMaxMinPercent.toLocaleString('pt-BR', {maximumFractionDigits: 2});
-        if (document.getElementById('triAreaMin')) document.getElementById('triAreaMin').innerText = minTileArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
-        if (document.getElementById('triAreaMax')) document.getElementById('triAreaMax').innerText = maxTileArea.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+        if (document.getElementById('dispersionMethodTitle')) document.getElementById('dispersionMethodTitle').innerText = "1. Divisão em 100 Partes Idênticas";
+        if (document.getElementById('dispersionClassLabel')) {
+            document.getElementById('dispersionClassLabel').innerText = dispersionClass;
+            document.getElementById('dispersionClassLabel').style.color = getDispersionColor(dispersionClass);
+        }
 
-        if (document.getElementById('triOccupiedCount')) document.getElementById('triOccupiedCount').innerText = occupiedTilesCount;
-        if (document.getElementById('triOccupiedPercent')) document.getElementById('triOccupiedPercent').innerText = occupiedPercent.toLocaleString('pt-BR', {maximumFractionDigits: 1});
-        if (document.getElementById('triOccupiedDetail')) document.getElementById('triOccupiedDetail').innerText = `${occupiedTilesCount} de ${totalTiles} partes (${occupiedPercent.toFixed(1)}% da EOO)`;
-        if (document.getElementById('triEmptyCount')) document.getElementById('triEmptyCount').innerText = `${emptyTilesCount} de ${totalTiles} partes (${(100 - occupiedPercent).toFixed(1)}%)`;
-        if (document.getElementById('triDispersionClass')) document.getElementById('triDispersionClass').innerHTML = dispersionClass;
-
-        document.getElementById('triangulationResult').style.display = 'block';
-        document.getElementById('triangulationControls').style.display = 'block';
+        if (document.getElementById('dispersionMetricsContent')) {
+            document.getElementById('dispersionMetricsContent').innerHTML = `
+                • <b>Partes Ocupadas com Registro:</b> ${occupiedTilesCount} de 100 (${occupiedPercent.toFixed(1)}%)<br>
+                • <b>Partes Vazias sem Registro:</b> ${emptyTilesCount} de 100 (${(100 - occupiedPercent).toFixed(1)}%)<br>
+                • <b>Área Média de Cada Parte:</b> ${avgUnitArea.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²<br>
+                • <b>Variação de Área entre Partes:</b> &plusmn;${diffMaxMin.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m² (${diffMaxMinPercent.toFixed(2)}%)<br>
+                <div class="hint" style="margin-top: 6px;">
+                    Mede a proporção de polígonos idênticos (favo/concêntrico) que possuem ocorrência registrada.
+                </div>
+            `;
+        }
 
         if (trianglesLayer.getBounds().isValid()) {
             map.fitBounds(trianglesLayer.getBounds());
         }
+    }
+
+    function runVoronoiMethod() {
+        const pts = getUniqueValidPoints();
+        if (pts.length < 3) {
+            alert('São necessários pelo menos 3 pontos para os Polígonos de Voronoi.');
+            return;
+        }
+
+        const bbox = turf.bbox(currentHullGeoJSON);
+        const turfPts = turf.featureCollection(pts.map(p => turf.point(p)));
+
+        let voronoiDiagram;
+        try {
+            voronoiDiagram = turf.voronoi(turfPts, { bbox: bbox });
+        } catch (e) {
+            console.error(e);
+            alert('Não foi possível gerar os Polígonos de Voronoi.');
+            return;
+        }
+
+        const areas = [];
+        let count = 0;
+
+        voronoiDiagram.features.forEach((cell, idx) => {
+            if (!cell) return;
+            try {
+                const clipped = turf.intersect(cell, currentHullGeoJSON);
+                if (clipped) {
+                    const cellArea = turf.area(clipped);
+                    areas.push(cellArea);
+                    count++;
+
+                    const leafletCoords = clipped.geometry.coordinates[0].map(c => [c[1], c[0]]);
+                    const poly = L.polygon(leafletCoords, {
+                        color: '#1a73e8',
+                        weight: 1.5,
+                        opacity: 0.8,
+                        fillColor: idx % 2 === 0 ? '#34a853' : '#1a73e8',
+                        fillOpacity: 0.25
+                    }).addTo(trianglesLayer);
+
+                    poly.bindTooltip(`<b>Célula Voronoi #${count}</b><br>Área: ${cellArea.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²`, { sticky: true });
+                }
+            } catch (err) {}
+        });
+
+        if (areas.length === 0) return;
+
+        const meanArea = areas.reduce((a, b) => a + b, 0) / areas.length;
+        const variance = areas.reduce((sum, a) => sum + Math.pow(a - meanArea, 2), 0) / areas.length;
+        const stdDev = Math.sqrt(variance);
+        const cv = meanArea > 0 ? (stdDev / meanArea) * 100 : 0;
+
+        let classification = "";
+        if (cv > 120) classification = "Muito Baixa Dispersão (Forte Agrupamento / Ilhas)";
+        else if (cv > 85) classification = "Baixa Dispersão (Aglomeração Espacial)";
+        else if (cv > 55) classification = "Moderada Dispersão (Distribuição Intermediária)";
+        else if (cv > 30) classification = "Alta Dispersão (Bem Espalhada)";
+        else classification = "Muito Alta Dispersão (Uniforme / Homogênea)";
+
+        document.getElementById('dispersionMethodTitle').innerText = "2. Polígonos de Voronoi (Tesselação de Dirichlet)";
+        document.getElementById('dispersionClassLabel').innerText = classification;
+        document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
+
+        document.getElementById('dispersionMetricsContent').innerHTML = `
+            • <b>Total de Células Recortadas:</b> ${areas.length}<br>
+            • <b>Área Média das Células:</b> ${meanArea.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²<br>
+            • <b>Desvio Padrão das Áreas:</b> ${stdDev.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²<br>
+            • <b>Coeficiente de Variação (CV):</b> ${cv.toFixed(1)}%<br>
+            <div class="hint" style="margin-top: 6px;">
+                Células Voronoi de áreas semelhantes indicam ampla ocupação sem distorcer o polígono da EOO.
+            </div>
+        `;
+    }
+
+    function runClarkEvansMethod() {
+        const pts = getUniqueValidPoints();
+        const n = pts.length;
+        if (n < 2) {
+            alert('São necessários pelo menos 2 pontos para o Índice de Clark-Evans.');
+            return;
+        }
+
+        const eooArea = turf.area(currentHullGeoJSON);
+        let sumDistances = 0;
+
+        for (let i = 0; i < n; i++) {
+            const p1 = turf.point(pts[i]);
+            let minDist = Infinity;
+            let nearestPoint = null;
+
+            for (let j = 0; j < n; j++) {
+                if (i === j) continue;
+                const p2 = turf.point(pts[j]);
+                const dist = turf.distance(p1, p2, { units: 'meters' });
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestPoint = pts[j];
+                }
+            }
+
+            sumDistances += minDist;
+
+            if (nearestPoint) {
+                L.polyline([[pts[i][1], pts[i][0]], [nearestPoint[1], nearestPoint[0]]], {
+                    color: '#e65100',
+                    weight: 2,
+                    dashArray: '4, 4',
+                    opacity: 0.8
+                }).addTo(trianglesLayer);
+            }
+        }
+
+        const rObs = sumDistances / n;
+        const density = n / eooArea;
+        const rExp = 1 / (2 * Math.sqrt(density));
+        const R = rExp > 0 ? (rObs / rExp) : 1;
+
+        let classification = "";
+        if (R <= 0.45) classification = "Muito Baixa Dispersão (Fortemente Agregado)";
+        else if (R <= 0.80) classification = "Baixa Dispersão (Agregado em Clusters)";
+        else if (R <= 1.15) classification = "Moderada Dispersão (Padrão Aleatório)";
+        else if (R <= 1.50) classification = "Alta Dispersão (Tendência Uniforme)";
+        else classification = "Muito Alta Dispersão (Espaçado Regularmente)";
+
+        document.getElementById('dispersionMethodTitle').innerText = "3. Índice de Clark-Evans (Vizinho Mais Próximo)";
+        document.getElementById('dispersionClassLabel').innerText = classification;
+        document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
+
+        document.getElementById('dispersionMetricsContent').innerHTML = `
+            • <b>Índice de Clark-Evans (R):</b> ${R.toFixed(3)}<br>
+            • <b>Distância Média Observada:</b> ${(rObs >= 1000 ? (rObs/1000).toFixed(2) + ' km' : rObs.toFixed(1) + ' m')}<br>
+            • <b>Distância Esperada (Aleatória):</b> ${(rExp >= 1000 ? (rExp/1000).toFixed(2) + ' km' : rExp.toFixed(1) + ' m')}<br>
+            • <b>Densidade de Pontos na EOO:</b> ${(density * 1e6).toFixed(2)} pontos / km²<br>
+            <div class="hint" style="margin-top: 6px;">
+                R &lt; 1 indica agrupamento de pontos; R = 1 padrão aleatório; R &gt; 1 indica espalhamento uniforme.
+            </div>
+        `;
+    }
+
+    function runGridIucnMethod() {
+        const pts = getUniqueValidPoints();
+        const bbox = turf.bbox(currentHullGeoJSON);
+        const minX = bbox[0], minY = bbox[1], maxX = bbox[2], maxY = bbox[3];
+
+        const steps = 10;
+        const stepX = (maxX - minX) / steps;
+        const stepY = (maxY - minY) / steps;
+
+        const turfPts = pts.map(p => turf.point(p));
+        let totalCellsInHull = 0;
+        let occupiedCellsCount = 0;
+
+        for (let i = 0; i < steps; i++) {
+            for (let j = 0; j < steps; j++) {
+                const cellBbox = [
+                    minX + i * stepX,
+                    minY + j * stepY,
+                    minX + (i + 1) * stepX,
+                    minY + (j + 1) * stepY
+                ];
+                const cellPoly = turf.bboxPolygon(cellBbox);
+
+                let intersects = false;
+                try {
+                    const clipped = turf.intersect(cellPoly, currentHullGeoJSON);
+                    if (clipped) intersects = true;
+                } catch (e) {}
+
+                if (intersects) {
+                    totalCellsInHull++;
+                    let isOccupied = false;
+                    for (const pt of turfPts) {
+                        if (turf.booleanPointInPolygon(pt, cellPoly)) {
+                            isOccupied = true;
+                            break;
+                        }
+                    }
+
+                    if (isOccupied) occupiedCellsCount++;
+
+                    const leafletCoords = cellPoly.geometry.coordinates[0].map(c => [c[1], c[0]]);
+                    const poly = L.polygon(leafletCoords, {
+                        color: isOccupied ? '#1e8e3e' : '#8e24aa',
+                        weight: isOccupied ? 1.5 : 0.8,
+                        fillColor: isOccupied ? '#34a853' : '#ab47bc',
+                        fillOpacity: isOccupied ? 0.5 : 0.15
+                    }).addTo(trianglesLayer);
+
+                    poly.bindTooltip(`<b>Quadrante IUCN</b><br>Status: ${isOccupied ? '<b style="color:#2d8a47;">Ocupado</b>' : 'Vazio'}`, { sticky: true });
+                }
+            }
+        }
+
+        const occupiedPercent = totalCellsInHull > 0 ? (occupiedCellsCount / totalCellsInHull) * 100 : 0;
+
+        let classification = "";
+        if (occupiedPercent <= 20) classification = "Muito Baixa Dispersão (Muito Concentrado)";
+        else if (occupiedPercent <= 40) classification = "Baixa Dispersão (Pouca Cobertura)";
+        else if (occupiedPercent <= 60) classification = "Moderada Dispersão (Distribuição Média)";
+        else if (occupiedPercent <= 80) classification = "Alta Dispersão (Boa Cobertura)";
+        else classification = "Muito Alta Dispersão (Excelente Cobertura da EOO)";
+
+        document.getElementById('dispersionMethodTitle').innerText = "4. Grid de Quadrantes Fixos (Padrão IUCN)";
+        document.getElementById('dispersionClassLabel').innerText = classification;
+        document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
+
+        document.getElementById('dispersionMetricsContent').innerHTML = `
+            • <b>Quadrantes Ocupados:</b> ${occupiedCellsCount} de ${totalCellsInHull} (${occupiedPercent.toFixed(1)}%)<br>
+            • <b>Quadrantes Vazios:</b> ${totalCellsInHull - occupiedCellsCount} (${(100 - occupiedPercent).toFixed(1)}%)<br>
+            • <b>Resolução do Grid:</b> 10 x 10 no Bounding Box<br>
+            <div class="hint" style="margin-top: 6px;">
+                Mede a proporção da área do polígono coberta por uma grade fixa regular contendo ocorrências.
+            </div>
+        `;
+    }
+
+    function runMstMethod() {
+        const pts = getUniqueValidPoints();
+        const n = pts.length;
+        if (n < 3) {
+            alert('São necessários pelo menos 3 pontos para a Árvore Geradora Mínima.');
+            return;
+        }
+
+        const matrix = Array.from({ length: n }, () => new Array(n).fill(0));
+        for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+                const dist = turf.distance(turf.point(pts[i]), turf.point(pts[j]), { units: 'meters' });
+                matrix[i][j] = dist;
+                matrix[j][i] = dist;
+            }
+        }
+
+        const inMST = new Array(n).fill(false);
+        inMST[0] = true;
+        const edgeLengths = [];
+
+        for (let iter = 0; iter < n - 1; iter++) {
+            let minDist = Infinity;
+            let u = -1, v = -1;
+
+            for (let i = 0; i < n; i++) {
+                if (inMST[i]) {
+                    for (let j = 0; j < n; j++) {
+                        if (!inMST[j] && matrix[i][j] < minDist) {
+                            minDist = matrix[i][j];
+                            u = i;
+                            v = j;
+                        }
+                    }
+                }
+            }
+
+            if (v !== -1) {
+                inMST[v] = true;
+                edgeLengths.push(minDist);
+
+                L.polyline([[pts[u][1], pts[u][0]], [pts[v][1], pts[v][0]]], {
+                    color: '#8e24aa',
+                    weight: 3.5,
+                    opacity: 0.9
+                }).addTo(trianglesLayer);
+            }
+        }
+
+        const totalMstLength = edgeLengths.reduce((a, b) => a + b, 0);
+        const meanEdge = totalMstLength / edgeLengths.length;
+        const variance = edgeLengths.reduce((sum, len) => sum + Math.pow(len - meanEdge, 2), 0) / edgeLengths.length;
+        const stdDev = Math.sqrt(variance);
+        const cv = meanEdge > 0 ? (stdDev / meanEdge) * 100 : 0;
+
+        let classification = "";
+        if (cv > 110) classification = "Muito Baixa Dispersão (Clusters Isolados)";
+        else if (cv > 80) classification = "Baixa Dispersão (Agrupamentos Regionais)";
+        else if (cv > 50) classification = "Moderada Dispersão (Rede Equilibrada)";
+        else if (cv > 30) classification = "Alta Dispersão (Rede Uniforme)";
+        else classification = "Muito Alta Dispersão (Distribuição Homogênea)";
+
+        document.getElementById('dispersionMethodTitle').innerText = "5. Árvore Geradora Mínima (Minimum Spanning Tree - MST)";
+        document.getElementById('dispersionClassLabel').innerText = classification;
+        document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
+
+        document.getElementById('dispersionMetricsContent').innerHTML = `
+            • <b>Comprimento Total da Rede (MST):</b> ${(totalMstLength >= 1000 ? (totalMstLength/1000).toFixed(2) + ' km' : totalMstLength.toFixed(1) + ' m')}<br>
+            • <b>Comprimento Médio das Arestas:</b> ${(meanEdge >= 1000 ? (meanEdge/1000).toFixed(2) + ' km' : meanEdge.toFixed(1) + ' m')}<br>
+            • <b>Desvio Padrão das Arestas:</b> ${(stdDev >= 1000 ? (stdDev/1000).toFixed(2) + ' km' : stdDev.toFixed(1) + ' m')}<br>
+            • <b>Coeficiente de Variação (CV):</b> ${cv.toFixed(1)}%<br>
+            <div class="hint" style="margin-top: 6px;">
+                Conexões com distâncias similares indicam que a população está uniformemente distribuída.
+            </div>
+        `;
+    }
+
+    function runRipleyKMethod() {
+        const pts = getUniqueValidPoints();
+        const n = pts.length;
+        if (n < 3) {
+            alert('São necessários pelo menos 3 pontos para a Função K de Ripley.');
+            return;
+        }
+
+        const eooArea = turf.area(currentHullGeoJSON);
+        let maxPairDist = 0;
+
+        for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+                const dist = turf.distance(turf.point(pts[i]), turf.point(pts[j]), { units: 'meters' });
+                if (dist > maxPairDist) maxPairDist = dist;
+            }
+        }
+
+        const testRadius = 0.25 * maxPairDist;
+        let countWithinRadius = 0;
+
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                if (i === j) continue;
+                const dist = turf.distance(turf.point(pts[i]), turf.point(pts[j]), { units: 'meters' });
+                if (dist <= testRadius) countWithinRadius++;
+            }
+        }
+
+        const K_obs = (eooArea / (n * n)) * countWithinRadius;
+        const K_exp = Math.PI * Math.pow(testRadius, 2);
+        const L_val = Math.sqrt(K_obs / Math.PI) - testRadius;
+        const S_score = testRadius > 0 ? (L_val / testRadius) : 0;
+
+        const centroid = turf.centroid(currentHullGeoJSON);
+        L.circle([centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]], {
+            radius: testRadius,
+            color: '#1a73e8',
+            weight: 2,
+            dashArray: '5, 5',
+            fillColor: '#1a73e8',
+            fillOpacity: 0.1
+        }).addTo(trianglesLayer);
+
+        let classification = "";
+        if (S_score > 0.35) classification = "Muito Baixa Dispersão (Forte Agrupamento Espacial)";
+        else if (S_score > 0.12) classification = "Baixa Dispersão (Agrupamento Espacial)";
+        else if (S_score >= -0.12) classification = "Moderada Dispersão (Padrão Aleatório)";
+        else if (S_score >= -0.35) classification = "Alta Dispersão (Tendência Uniforme)";
+        else classification = "Muito Alta Dispersão (Espaçamento Uniforme/Regular)";
+
+        document.getElementById('dispersionMethodTitle').innerText = "6. Função K de Ripley (Análise Multiescala - Besag's L)";
+        document.getElementById('dispersionClassLabel').innerText = classification;
+        document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
+
+        document.getElementById('dispersionMetricsContent').innerHTML = `
+            • <b>Score L de Besag:</b> ${(L_val >= 1000 ? (L_val/1000).toFixed(2) + ' km' : L_val.toFixed(1) + ' m')}<br>
+            • <b>Raio de Teste Analisado (r):</b> ${(testRadius >= 1000 ? (testRadius/1000).toFixed(2) + ' km' : testRadius.toFixed(1) + ' m')}<br>
+            • <b>K Observado K(r):</b> ${(K_obs / 1e6).toFixed(2)} km²<br>
+            • <b>K Esperado K_exp(r):</b> ${(K_exp / 1e6).toFixed(2)} km²<br>
+            <div class="hint" style="margin-top: 6px;">
+                L(r) &gt; 0 indica agregação em clusters; L(r) &lt; 0 indica distribuição uniforme/espalhada.
+            </div>
+        `;
     }
 
 
@@ -1804,9 +2205,8 @@
         trianglesLayer.clearLayers();
         currentHullGeoJSON = null;
         document.getElementById('hullResult').style.display = 'none';
-        if (document.getElementById('btnTriangulate')) document.getElementById('btnTriangulate').style.display = 'none';
-        if (document.getElementById('triangulationControls')) document.getElementById('triangulationControls').style.display = 'none';
-        if (document.getElementById('triangulationResult')) document.getElementById('triangulationResult').style.display = 'none';
+        if (document.getElementById('dispersionAnalysisSection')) document.getElementById('dispersionAnalysisSection').style.display = 'none';
+        if (document.getElementById('dispersionResultCard')) document.getElementById('dispersionResultCard').style.display = 'none';
         document.getElementById('occurrenceRateResult').style.display = 'none';
         document.getElementById('analysisSection').style.display = 'none';
         document.getElementById('analysisResult').style.display = 'none';
@@ -1828,9 +2228,8 @@
             trianglesLayer.clearLayers();
             currentHullGeoJSON = null;
             document.getElementById('hullResult').style.display = 'none';
-            if (document.getElementById('btnTriangulate')) document.getElementById('btnTriangulate').style.display = 'none';
-            if (document.getElementById('triangulationControls')) document.getElementById('triangulationControls').style.display = 'none';
-            if (document.getElementById('triangulationResult')) document.getElementById('triangulationResult').style.display = 'none';
+            if (document.getElementById('dispersionAnalysisSection')) document.getElementById('dispersionAnalysisSection').style.display = 'none';
+            if (document.getElementById('dispersionResultCard')) document.getElementById('dispersionResultCard').style.display = 'none';
             document.getElementById('occurrenceRateResult').style.display = 'none';
             document.getElementById('analysisSection').style.display = 'none';
             document.getElementById('analysisResult').style.display = 'none';

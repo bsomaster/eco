@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c32ff435-1f79-4189-bc00-a646911b15f1" name="Changes" comment="Ajuste de CORS">
+    <list default="true" id="c32ff435-1f79-4189-bc00-a646911b15f1" name="Changes" comment="Modo de avaliação">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
@@ -162,7 +162,23 @@
       <option name="project" value="LOCAL" />
       <updated>1793554832386</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Contadores">
+      <option name="closed" value="true" />
+      <created>1793556844056</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1793556844056</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Modo de avaliação">
+      <option name="closed" value="true" />
+      <created>1793582988948</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1793582988948</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -188,6 +204,8 @@
     <MESSAGE value="Divisão de fontes" />
     <MESSAGE value="Alteração de pastas" />
     <MESSAGE value="Ajuste de CORS" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ajuste de CORS" />
+    <MESSAGE value="Contadores" />
+    <MESSAGE value="Modo de avaliação" />
+    <option name="LAST_COMMIT_MESSAGE" value="Modo de avaliação" />
   </component>
 </project>
