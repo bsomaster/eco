@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c32ff435-1f79-4189-bc00-a646911b15f1" name="Changes" comment="Modo de avaliação">
+    <list default="true" id="c32ff435-1f79-4189-bc00-a646911b15f1" name="Changes" comment="Novo visual">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
@@ -186,7 +186,15 @@
       <option name="project" value="LOCAL" />
       <updated>1793604750017</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Novo visual">
+      <option name="closed" value="true" />
+      <created>1793607232173</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1793607232173</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -214,6 +222,7 @@
     <MESSAGE value="Ajuste de CORS" />
     <MESSAGE value="Contadores" />
     <MESSAGE value="Modo de avaliação" />
-    <option name="LAST_COMMIT_MESSAGE" value="Modo de avaliação" />
+    <MESSAGE value="Novo visual" />
+    <option name="LAST_COMMIT_MESSAGE" value="Novo visual" />
   </component>
 </project>

@@ -513,22 +513,37 @@
             background-color: var(--bg-dark) !important;
         }
 
-        .leaflet-control-layers, .leaflet-control-zoom {
+        .leaflet-control-layers, .leaflet-control-zoom, .leaflet-bar {
             background: var(--surface-dark) !important;
             color: var(--text-primary) !important;
             border: 1px solid var(--border-color) !important;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
         }
 
-        .leaflet-control-zoom a, .leaflet-control-layers-toggle {
+        .leaflet-control-zoom a, .leaflet-control-layers-toggle, .leaflet-control-locate {
             background-color: var(--surface-dark) !important;
             color: var(--text-primary) !important;
             border-bottom: 1px solid var(--border-color) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 30px !important;
+            height: 30px !important;
+            line-height: 30px !important;
+            text-align: center !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
 
-        .leaflet-control-zoom a:hover {
+        .leaflet-control-zoom a:hover, .leaflet-control-locate:hover {
             background-color: var(--surface-hover) !important;
             color: var(--accent) !important;
+        }
+
+        .leaflet-control-locate svg {
+            width: 16px;
+            height: 16px;
+            display: block;
         }
 
         .leaflet-control-layers-expanded {
@@ -1023,13 +1038,6 @@
 <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
 
 <script>
-    // Camada Base Dark Theme (CartoDB Dark Matter)
-    const darkMatter = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
-    });
-
     const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
     });
@@ -1043,21 +1051,75 @@
         attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Style: OpenTopoMap'
     });
 
-    // Inicialização do Mapa
+    // Inicialização do Mapa (OSM como padrão, Zoom e Localização no canto superior direito)
     const map = L.map('map', {
         center: [-15.78, -47.93],
         zoom: 4,
-        layers: [darkMatter]
+        layers: [osm],
+        zoomControl: false
     });
 
+    // 1. Controle de Troca de Mapa (No topo, acima dos botões de zoom)
     const baseMaps = {
-        "Escuro (Dark)": darkMatter,
-        "Satélite": satellite,
         "Mapa (OSM)": osm,
+        "Satélite": satellite,
         "Relevo": terrain
     };
+    L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
-    L.control.layers(baseMaps).addTo(map);
+    // 2. Botões de Zoom (Abaixo da Troca de Mapa)
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    // 3. Botão de Minha Localização (Abaixo do Zoom)
+    const LocateControl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function () {
+            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+            const button = L.DomUtil.create('a', 'leaflet-control-locate', container);
+            button.href = '#';
+            button.title = 'Minha Localização';
+            button.role = 'button';
+            button.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="8"></circle>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"></circle>
+                    <line x1="12" y1="2" x2="12" y2="5"></line>
+                    <line x1="12" y1="19" x2="12" y2="22"></line>
+                    <line x1="2" y1="12" x2="5" y2="12"></line>
+                    <line x1="19" y1="12" x2="22" y2="12"></line>
+                </svg>
+            `;
+
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.on(button, 'click', function (e) {
+                L.DomEvent.preventDefault(e);
+                locateUser();
+            });
+
+            return container;
+        }
+    });
+
+    map.addControl(new LocateControl());
+
+    function locateUser() {
+        if (!navigator.geolocation) {
+            alert('Geolocalização não é suportada pelo seu navegador.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                map.panTo([lat, lng]);
+            },
+            (err) => {
+                alert('Não foi possível obter sua localização: ' + err.message);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
 
     const regionLayer = L.featureGroup().addTo(map);
     const pointsLayer = L.featureGroup().addTo(map);
