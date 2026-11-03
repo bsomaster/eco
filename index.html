@@ -508,6 +508,102 @@
             margin: 0 2px !important;
         }
 
+        .modal-content.fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+        }
+
+        .preset-btn.active-fmt {
+            background: var(--primary) !important;
+            color: #ffffff !important;
+            border-color: var(--accent) !important;
+        }
+
+        .fab-btn:disabled, .fab-btn.disabled {
+            opacity: 0.35 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            filter: grayscale(1) !important;
+        }
+
+        .dispersion-panel {
+            position: fixed;
+            left: 76px;
+            bottom: 20px;
+            width: 360px;
+            background: var(--surface-dark);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 1600;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .dispersion-panel-header {
+            padding: 10px 14px;
+            background: #09090b;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .panel-header-btn {
+            background: none !important;
+            border: none !important;
+            color: var(--text-secondary);
+            font-size: 12px !important;
+            cursor: pointer;
+            padding: 2px 6px !important;
+            height: auto !important;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .panel-header-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .dispersion-panel-body {
+            padding: 14px;
+            overflow-y: auto;
+            max-height: calc(75vh - 40px);
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.35s ease;
+            opacity: 1;
+        }
+
+        .dispersion-panel-body.minimized {
+            max-height: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            opacity: 0 !important;
+            overflow: hidden !important;
+            border: none !important;
+        }
+
         /* Leaflet Dark Styles */
         .leaflet-container {
             background-color: var(--bg-dark) !important;
@@ -555,38 +651,145 @@
         .leaflet-popup-content-wrapper, .leaflet-popup-tip {
             background: var(--surface-dark) !important;
             color: var(--text-primary) !important;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.85) !important;
             border: 1px solid var(--border-color) !important;
+            padding: 0 !important;
+            border-radius: 4px !important;
         }
 
         .leaflet-popup-content {
             margin: 12px 14px !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
+            min-width: 250px;
         }
 
-        .popup-coords {
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: block;
+        .popup-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .popup-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
             color: var(--accent);
         }
 
-        .popup-actions {
+        .popup-source {
+            font-size: 10px;
+            font-weight: 600;
+            background: var(--surface-card);
+            color: var(--text-secondary);
+            padding: 2px 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .popup-coords-block {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
             display: flex;
+            flex-direction: column;
             gap: 6px;
         }
 
-        .popup-btn {
-            padding: 4px 10px;
-            font-size: 11px;
-            cursor: pointer;
-            border: none !important;
-            color: white;
-            font-weight: 600;
+        .popup-coord-row {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
         }
 
-        .popup-copy { background: var(--primary); }
-        .popup-delete { background: var(--danger); }
+        .coord-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .coord-val {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: monospace;
+        }
+
+        .coord-val.gms-text {
+            color: var(--accent);
+        }
+
+        .popup-link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 6px 10px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .popup-link-btn:hover {
+            background: rgba(56, 189, 248, 0.25);
+            color: #ffffff;
+        }
+
+        .popup-actions-grid {
+            display: flex;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .popup-action-btn {
+            flex: 1;
+            height: 28px !important;
+            padding: 0 6px !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            border: none !important;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+
+        .popup-action-btn.copy-btn {
+            background: var(--surface-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .popup-action-btn.copy-btn:hover {
+            background: var(--surface-hover);
+            color: var(--accent);
+            border-color: var(--accent) !important;
+        }
+
+        .popup-action-btn.delete-btn {
+            background: var(--danger);
+            color: #ffffff;
+        }
+
+        .popup-action-btn.delete-btn:hover {
+            background: #b91c1c;
+        }
 
         .info-btn {
             float: right;
@@ -705,24 +908,9 @@
         </button>
 
         <!-- 5. Polígono Convexo (EOO) -->
-        <button class="fab-btn" onclick="openModal('modal-hull')" data-tooltip="Polígono Convexo (EOO)">
+        <button id="fab-hull" class="fab-btn" onclick="toggleHull()" data-tooltip="Polígono Convexo (EOO)">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2L22 8.5V15.5L12 22L2 15.5V8.5L12 2Z"></path>
-            </svg>
-        </button>
-
-        <!-- 6. Análise de Dispersão Espacial -->
-        <button class="fab-btn" onclick="openModal('modal-dispersion')" data-tooltip="Análise de Dispersão Espacial">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"></circle>
-                <circle cx="19" cy="5" r="2"></circle>
-                <circle cx="5" cy="19" r="2"></circle>
-                <circle cx="19" cy="19" r="2"></circle>
-                <circle cx="5" cy="5" r="2"></circle>
-                <line x1="12" y1="9" x2="19" y2="5"></line>
-                <line x1="12" y1="15" x2="5" y2="19"></line>
-                <line x1="14.5" y1="14.5" x2="19" y2="19"></line>
-                <line x1="9.5" y1="9.5" x2="5" y2="5"></line>
             </svg>
         </button>
 
@@ -734,6 +922,21 @@
                 <line x1="3" y1="15" x2="21" y2="15"></line>
                 <line x1="9" y1="3" x2="9" y2="21"></line>
                 <line x1="15" y1="3" x2="15" y2="21"></line>
+            </svg>
+        </button>
+
+        <!-- 6. Análise de Dispersão Espacial -->
+        <button id="fab-dispersion" class="fab-btn disabled" onclick="toggleDispersion()" data-tooltip="Análise de Dispersão Espacial (Requer EOO Ativo)" disabled>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <circle cx="19" cy="5" r="2"></circle>
+                <circle cx="5" cy="19" r="2"></circle>
+                <circle cx="19" cy="19" r="2"></circle>
+                <circle cx="5" cy="5" r="2"></circle>
+                <line x1="12" y1="9" x2="19" y2="5"></line>
+                <line x1="12" y1="15" x2="5" y2="19"></line>
+                <line x1="14.5" y1="14.5" x2="19" y2="19"></line>
+                <line x1="9.5" y1="9.5" x2="5" y2="5"></line>
             </svg>
         </button>
     </div>
@@ -798,29 +1001,109 @@
     </div>
 </div>
 
-<!-- MODAL 2: LISTA DE COORDENADAS -->
+<!-- MODAL 2: LISTA DE COORDENADAS (TELA CHEIA) -->
 <div id="modal-coords" class="modal-overlay">
-    <div class="modal-content wide">
+    <div class="modal-content fullscreen">
         <div class="modal-header">
-            <h2>Lista de Coordenadas Registradas</h2>
+            <h2 id="modalCoordsTitle">Lista de Coordenadas Registradas</h2>
             <button class="close-modal" onclick="closeModal('modal-coords')">&times;</button>
         </div>
         <div class="modal-body">
-            <table class="points-table-large">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">#</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th style="width: 120px; text-align: right;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="modalPointsBody">
-                </tbody>
-            </table>
+            <!-- Painel de Adicionar Nova Coordenada -->
+            <div class="result-card" style="margin-top: 0; margin-bottom: 20px; border-left-color: var(--accent) !important;">
+                <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    Adicionar Nova Coordenada Manualmente
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+                    <div style="flex: 1; min-width: 220px;">
+                        <label style="font-size: 11px; color: var(--text-secondary);">FORMATO DAS COORDENADAS:</label>
+                        <div style="display: flex; gap: 4px; margin-top: 4px;">
+                            <button type="button" id="btnFmtDD" class="preset-btn active-fmt" onclick="setCoordFormat('dd')">Grau Decimal (GD)</button>
+                            <button type="button" id="btnFmtGMS" class="preset-btn" onclick="setCoordFormat('gms')">Graus, Min e Seg (GMS)</button>
+                        </div>
+                    </div>
+                    <div style="flex: 1; min-width: 220px;">
+                        <label style="font-size: 11px; color: var(--text-secondary);">MODO DE ENTRADA:</label>
+                        <div style="display: flex; gap: 4px; margin-top: 4px;">
+                            <button type="button" id="btnModeSingle" class="preset-btn active-fmt" onclick="setCoordMode('single')">Linha Única</button>
+                            <button type="button" id="btnModeSep" class="preset-btn" onclick="setCoordMode('separated')">Campos Separados</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. Grau Decimal - Linha Única -->
+                <div id="form-dd-single" class="coord-form-block">
+                    <div class="input-box" style="margin-bottom: 10px;">
+                        <label for="inputDDSingle">Coordenada em Linha Única (Lat, Lng):</label>
+                        <input type="text" id="inputDDSingle" placeholder="Ex: -15.7801, -47.9292  ou  -15.7801 -47.9292">
+                    </div>
+                </div>
+
+                <!-- 2. Grau Decimal - Campos Separados -->
+                <div id="form-dd-separated" class="coord-form-block" style="display: none;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <label for="inputDDSepLat">Latitude (GD):</label>
+                            <input type="number" step="any" id="inputDDSepLat" placeholder="Ex: -15.7801">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="inputDDSepLng">Longitude (GD):</label>
+                            <input type="number" step="any" id="inputDDSepLng" placeholder="Ex: -47.9292">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. GMS - Linha Única -->
+                <div id="form-gms-single" class="coord-form-block" style="display: none;">
+                    <div class="input-box" style="margin-bottom: 10px;">
+                        <label for="inputGMSSingle">Coordenada GMS em Linha Única:</label>
+                        <input type="text" id="inputGMSSingle" placeholder="Ex: 15° 46' 48.36&quot; S, 47° 55' 45.12&quot; W">
+                    </div>
+                </div>
+
+                <!-- 4. GMS - Campos Separados -->
+                <div id="form-gms-separated" class="coord-form-block" style="display: none;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="color: var(--accent);" for="gmsLatD">Latitude GMS:</label>
+                        <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+                            <input type="number" id="gmsLatD" placeholder="Graus (°)" aria-label="Graus Latitude" style="flex:1;">
+                            <input type="number" id="gmsLatM" placeholder="Min (')" aria-label="Minutos Latitude" style="flex:1;">
+                            <input type="number" step="any" id="gmsLatS" placeholder="Seg (&quot;)" aria-label="Segundos Latitude" style="flex:1.2;">
+                            <select id="gmsLatDir" aria-label="Direção Latitude" style="flex:1;">
+                                <option value="S">S (Sul)</option>
+                                <option value="N">N (Norte)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="color: var(--accent);" for="gmsLngD">Longitude GMS:</label>
+                        <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+                            <input type="number" id="gmsLngD" placeholder="Graus (°)" aria-label="Graus Longitude" style="flex:1;">
+                            <input type="number" id="gmsLngM" placeholder="Min (')" aria-label="Minutos Longitude" style="flex:1;">
+                            <input type="number" step="any" id="gmsLngS" placeholder="Seg (&quot;)" aria-label="Segundos Longitude" style="flex:1.2;">
+                            <select id="gmsLngDir" aria-label="Direção Longitude" style="flex:1;">
+                                <option value="W">W (Oeste)</option>
+                                <option value="E">E (Leste)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="success" onclick="handleAddCoordFromForm()" style="width: 100%; height: 38px; font-size: 13px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Adicionar Coordenada
+                </button>
+            </div>
+
+            <!-- Conteúdo Dinâmico (Grupos ou Coordenadas do Grupo Selecionado) -->
+            <div id="modalCoordsContent"></div>
         </div>
         <div class="modal-footer">
-            <div style="display: flex; gap: 8px;">
+            <div id="modalCoordsFooterActions" style="display: flex; gap: 8px;">
                 <button class="danger" onclick="deleteAllPoints()">Excluir Tudo</button>
                 <button class="secondary" onclick="copyAllCoords()">Copiar Todas</button>
             </div>
@@ -927,59 +1210,42 @@
     </div>
 </div>
 
-<!-- MODAL 6: ANÁLISE DE DISPERSÃO ESPACIAL -->
-<div id="modal-dispersion" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Análise de Dispersão Espacial na EOO</h2>
-            <button class="close-modal" onclick="closeModal('modal-dispersion')">&times;</button>
+<!-- PAINEL FLUTUANTE DE ANÁLISE DE DISPERSÃO (CANTO INFERIOR ESQUERDO) -->
+<div id="dispersionBottomPanel" class="dispersion-panel" style="display: none;">
+    <div class="dispersion-panel-header" onclick="toggleDispersionPanelMinimize()">
+        <span>Análise de Dispersão Espacial (EOO)</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="btnToggleDispersionMinimize" onclick="event.stopPropagation(); toggleDispersionPanelMinimize()" class="panel-header-btn" title="Expandir/Minimizar">▲</button>
+            <button onclick="event.stopPropagation(); toggleDispersion()" class="close-modal" aria-label="Fechar Painel de Dispersão" style="font-size: 18px;">&times;</button>
         </div>
-        <div class="modal-body">
-            <div id="dispersionWarnNoHull" style="display: none; background: #991b1b; color: white; padding: 12px; margin-bottom: 16px; font-size: 13px;">
-                É necessário calcular o Polígono Convexo (EOO) primeiro para realizar a análise de dispersão.
-            </div>
-
-            <div class="input-box">
-                <label for="dispersionMethodSelect">Método de Avaliação:</label>
-                <select id="dispersionMethodSelect" onchange="runSelectedDispersionMethod()">
-                    <option value="parts100">1. Divisão em 100 Partes Idênticas</option>
-                    <option value="voronoi">2. Polígonos de Voronoi (Tesselação)</option>
-                    <option value="clark_evans">3. Índice de Clark-Evans (Vizinho Mais Próximo)</option>
-                    <option value="grid_iucn">4. Grid de Quadrantes Fixos (Padrão IUCN)</option>
-                    <option value="mst">5. Árvore Geradora Mínima (MST)</option>
-                    <option value="ripley_k">6. Função K de Ripley (Análise Multiescala)</option>
-                </select>
-            </div>
-
-            <div id="triangulationControls" style="display: none;" class="input-box">
-                <label for="triangulationMode">Modo de Divisão (100 Partes):</label>
-                <select id="triangulationMode" onchange="runSelectedDispersionMethod()">
-                    <option value="honeycomb">Espiral em Favo</option>
-                    <option value="concentric">Retopologia Concêntrica</option>
-                </select>
-            </div>
-
-            <button id="btnRunDispersion" class="success" onclick="runSelectedDispersionMethod()" style="width: 100%; background: #7c3aed;">
-                Executar Análise de Dispersão
-            </button>
-
-            <!-- Card de Resultado -->
-            <div id="dispersionResultCard" class="result-card" style="display: none; border-left-color: #7c3aed !important;">
-                <div class="metric-label">Resultado da Dispersão</div>
-                <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 4px;" id="dispersionMethodTitle">-</div>
-
-                <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;">
-                    <div class="metric-label">Classificação da Dispersão na EOO</div>
-                    <div class="metric-value" id="dispersionClassLabel" style="font-size: 18px; color: var(--accent);">-</div>
-                </div>
-
-                <div id="dispersionMetricsContent" style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; font-size: 13px; line-height: 1.6;">
-                </div>
-            </div>
+    </div>
+    <div id="dispersionPanelBody" class="dispersion-panel-body minimized">
+        <div class="input-box" style="margin-bottom: 12px;">
+            <label for="dispersionMethodSelect">Método de Avaliação:</label>
+            <select id="dispersionMethodSelect" onchange="runSelectedDispersionMethod()">
+                <option value="parts100">1. Divisão em 100 Partes Idênticas</option>
+                <option value="voronoi">2. Polígonos de Voronoi (Tesselação)</option>
+                <option value="clark_evans">3. Índice de Clark-Evans (Vizinho Mais Próximo)</option>
+                <option value="grid_iucn">4. Grid de Quadrantes Fixos (Padrão IUCN)</option>
+                <option value="mst">5. Árvore Geradora Mínima (MST)</option>
+                <option value="ripley_k">6. Função K de Ripley (Análise Multiescala)</option>
+            </select>
         </div>
-        <div class="modal-footer">
-            <span></span>
-            <button class="secondary" onclick="closeModal('modal-dispersion')">Fechar</button>
+
+        <div id="triangulationControls" class="input-box" style="margin-bottom: 12px;">
+            <label for="triangulationMode">Modo de Divisão (100 Partes):</label>
+            <select id="triangulationMode" onchange="runSelectedDispersionMethod()">
+                <option value="honeycomb">Espiral em Favo</option>
+                <option value="concentric">Retopologia Concêntrica</option>
+            </select>
+        </div>
+
+        <!-- Card de Resultado -->
+        <div id="dispersionResultCard" class="result-card" style="display: none; margin-top: 10px; padding: 12px; border-left-color: #7c3aed !important;">
+            <div class="metric-label">Classificação da Dispersão na EOO</div>
+            <div class="metric-value" id="dispersionClassLabel" style="font-size: 16px; color: var(--accent);">-</div>
+            <div id="dispersionMetricsContent" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 8px; font-size: 12px; line-height: 1.5;">
+            </div>
         </div>
     </div>
 </div>
@@ -996,7 +1262,7 @@
                 <label for="squareSizeInput">Tamanho do Quadrante (m²)</label>
                 <input type="number" id="squareSizeInput" placeholder="Ex: 10000" step="any" value="10000">
                 <div class="preset-container">
-                    <button class="preset-btn" onclick="setSquarePreset(1000)">1.000 m²</button>
+                    <button class="preset-btn" onclick="setSquarePreset(4000)">4.000 m²</button>
                     <button class="preset-btn" onclick="setSquarePreset(10000)">10.000 m² (1 ha)</button>
                     <button class="preset-btn" onclick="setSquarePreset(40000)">40.000 m² (4 ha)</button>
                 </div>
@@ -1126,7 +1392,228 @@
     const hullLayer = L.featureGroup().addTo(map);
     const trianglesLayer = L.featureGroup().addTo(map);
 
-    let points = [];
+    let pointGroups = [];
+    let activeGroupId = null; // null = Visão de Grupos; string = Visão do Grupo especificado
+    let addCoordFormat = 'dd'; // 'dd' | 'gms'
+    let addCoordMode = 'single'; // 'single' | 'separated'
+
+    function getAllPoints() {
+        const all = [];
+        if (!Array.isArray(pointGroups)) return all;
+        pointGroups.forEach(g => {
+            if (g && g.points && Array.isArray(g.points)) {
+                g.points.forEach(p => {
+                    if (Array.isArray(p) && p.length >= 2 && p[0] != null && p[1] != null && !isNaN(p[0]) && !isNaN(p[1])) {
+                        all.push(p);
+                    }
+                });
+            }
+        });
+        return all;
+    }
+
+    Object.defineProperty(window, 'points', {
+        get: function() { return getAllPoints(); },
+        set: function(val) {
+            if (Array.isArray(val) && val.length === 0) {
+                pointGroups = [];
+                activeGroupId = null;
+            } else if (Array.isArray(val)) {
+                pointGroups = [{
+                    id: 'manual',
+                    name: 'Pontos Adicionados Manualmente',
+                    type: 'manual',
+                    points: val
+                }];
+            }
+        },
+        configurable: true
+    });
+
+    // --- Utilitários de Conversão GMS <-> Grau Decimal ---
+    function dmsToDecimal(degrees, minutes, seconds, direction) {
+        let deg = parseFloat(degrees) || 0;
+        let min = parseFloat(minutes) || 0;
+        let sec = parseFloat(seconds) || 0;
+        let dec = Math.abs(deg) + (min / 60) + (sec / 3600);
+        const dir = (direction || '').toUpperCase();
+        if (dir === 'S' || dir === 'W' || dir === 'O' || deg < 0) {
+            dec = -Math.abs(dec);
+        } else if (dir === 'N' || dir === 'E' || dir === 'L') {
+            dec = Math.abs(dec);
+        }
+        return dec;
+    }
+
+    function decimalToDMS(degVal, isLat) {
+        if (degVal == null || isNaN(degVal)) return '';
+        const val = Math.abs(degVal);
+        const d = Math.floor(val);
+        const minRem = (val - d) * 60;
+        const m = Math.floor(minRem);
+        const s = ((minRem - m) * 60).toFixed(2);
+        let dir = '';
+        if (isLat) {
+            dir = degVal >= 0 ? 'N' : 'S';
+        } else {
+            dir = degVal >= 0 ? 'E' : 'W';
+        }
+        return `${d}° ${m}' ${s}" ${dir}`;
+    }
+
+    function parseSingleLineCoords(text) {
+        if (!text) return null;
+        text = text.trim();
+
+        // 1. GMS Linha Única: e.g. 15° 46' 48.36" S, 47° 55' 45.12" W
+        const dmsRegex = /(\d+)[°\s]+(\d+)['\s]+(\d+(?:\.\d+)?)"?\s*([NSns])\s*[,;\s]\s*(\d+)[°\s]+(\d+)['\s]+(\d+(?:\.\d+)?)"?\s*([WEOLweol])/i;
+        const dmsMatch = text.match(dmsRegex);
+        if (dmsMatch) {
+            const lat = dmsToDecimal(dmsMatch[1], dmsMatch[2], dmsMatch[3], dmsMatch[4]);
+            const lng = dmsToDecimal(dmsMatch[5], dmsMatch[6], dmsMatch[7], dmsMatch[8]);
+            if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+        }
+
+        // 2. GMS em ordem invertida ou com separadores flexíveis
+        const dmsRegex2 = /(\d+)[°\s]+(\d+)['\s]+(\d+(?:\.\d+)?)"?\s*([NSWEOLnsweol])[\s,;]+(\d+)[°\s]+(\d+)['\s]+(\d+(?:\.\d+)?)"?\s*([NSWEOLnsweol])/i;
+        const dmsMatch2 = text.match(dmsRegex2);
+        if (dmsMatch2) {
+            let latVal = null, lngVal = null;
+            const dir1 = dmsMatch2[4].toUpperCase();
+            const dir2 = dmsMatch2[8].toUpperCase();
+            if (['N','S'].includes(dir1) && ['E','W','O','L'].includes(dir2)) {
+                latVal = dmsToDecimal(dmsMatch2[1], dmsMatch2[2], dmsMatch2[3], dmsMatch2[4]);
+                lngVal = dmsToDecimal(dmsMatch2[5], dmsMatch2[6], dmsMatch2[7], dmsMatch2[8]);
+            } else if (['E','W','O','L'].includes(dir1) && ['N','S'].includes(dir2)) {
+                lngVal = dmsToDecimal(dmsMatch2[1], dmsMatch2[2], dmsMatch2[3], dmsMatch2[4]);
+                latVal = dmsToDecimal(dmsMatch2[5], dmsMatch2[6], dmsMatch2[7], dmsMatch2[8]);
+            }
+            if (latVal !== null && lngVal !== null && !isNaN(latVal) && !isNaN(lngVal)) {
+                return { lat: latVal, lng: lngVal };
+            }
+        }
+
+        // 3. Grau Decimal Linha Única: e.g. -15.7801, -47.9292 ou -15.7801 -47.9292
+        const ddRegex = /([-+]?\d+(?:\.\d+)?)\s*([NSns])?\s*[,;\s]\s*([-+]?\d+(?:\.\d+)?)\s*([WEOLweol])?/i;
+        const ddMatch = text.match(ddRegex);
+        if (ddMatch) {
+            let lat = parseFloat(ddMatch[1]);
+            if (ddMatch[2]) {
+                const dir = ddMatch[2].toUpperCase();
+                if (dir === 'S') lat = -Math.abs(lat);
+                if (dir === 'N') lat = Math.abs(lat);
+            }
+            let lng = parseFloat(ddMatch[3]);
+            if (ddMatch[4]) {
+                const dir = ddMatch[4].toUpperCase();
+                if (dir === 'W' || dir === 'O') lng = -Math.abs(lng);
+                if (dir === 'E' || dir === 'L') lng = Math.abs(lng);
+            }
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                return { lat, lng };
+            }
+        }
+
+        return null;
+    }
+
+    function setCoordFormat(fmt) {
+        addCoordFormat = fmt;
+        const btnDD = document.getElementById('btnFmtDD');
+        const btnGMS = document.getElementById('btnFmtGMS');
+        if (btnDD) btnDD.classList.toggle('active-fmt', fmt === 'dd');
+        if (btnGMS) btnGMS.classList.toggle('active-fmt', fmt === 'gms');
+        updateCoordFormVisibility();
+    }
+
+    function setCoordMode(mode) {
+        addCoordMode = mode;
+        const btnSingle = document.getElementById('btnModeSingle');
+        const btnSep = document.getElementById('btnModeSep');
+        if (btnSingle) btnSingle.classList.toggle('active-fmt', mode === 'single');
+        if (btnSep) btnSep.classList.toggle('active-fmt', mode === 'separated');
+        updateCoordFormVisibility();
+    }
+
+    function updateCoordFormVisibility() {
+        const fDDSingle = document.getElementById('form-dd-single');
+        const fDDSep = document.getElementById('form-dd-separated');
+        const fGMSSingle = document.getElementById('form-gms-single');
+        const fGMSSep = document.getElementById('form-gms-separated');
+
+        if (fDDSingle) fDDSingle.style.display = (addCoordFormat === 'dd' && addCoordMode === 'single') ? 'block' : 'none';
+        if (fDDSep) fDDSep.style.display = (addCoordFormat === 'dd' && addCoordMode === 'separated') ? 'block' : 'none';
+        if (fGMSSingle) fGMSSingle.style.display = (addCoordFormat === 'gms' && addCoordMode === 'single') ? 'block' : 'none';
+        if (fGMSSep) fGMSSep.style.display = (addCoordFormat === 'gms' && addCoordMode === 'separated') ? 'block' : 'none';
+    }
+
+    function handleAddCoordFromForm() {
+        let lat = null;
+        let lng = null;
+
+        if (addCoordFormat === 'dd' && addCoordMode === 'single') {
+            const val = document.getElementById('inputDDSingle').value;
+            const res = parseSingleLineCoords(val);
+            if (res) { lat = res.lat; lng = res.lng; }
+            else { alert('Formato de Grau Decimal em linha única inválido. Exemplo: -15.7801, -47.9292'); return; }
+        } else if (addCoordFormat === 'dd' && addCoordMode === 'separated') {
+            const latVal = parseFloat(document.getElementById('inputDDSepLat').value);
+            const lngVal = parseFloat(document.getElementById('inputDDSepLng').value);
+            if (!isNaN(latVal) && !isNaN(lngVal) && latVal >= -90 && latVal <= 90 && lngVal >= -180 && lngVal <= 180) {
+                lat = latVal;
+                lng = lngVal;
+            } else {
+                alert('Por favor, informe valores válidos para Latitude (-90 a 90) e Longitude (-180 a 180).');
+                return;
+            }
+        } else if (addCoordFormat === 'gms' && addCoordMode === 'single') {
+            const val = document.getElementById('inputGMSSingle').value;
+            const res = parseSingleLineCoords(val);
+            if (res) { lat = res.lat; lng = res.lng; }
+            else { alert('Formato GMS em linha única inválido. Exemplo: 15° 46\' 48.36" S, 47° 55\' 45.12" W'); return; }
+        } else if (addCoordFormat === 'gms' && addCoordMode === 'separated') {
+            const dLat = document.getElementById('gmsLatD').value;
+            const mLat = document.getElementById('gmsLatM').value;
+            const sLat = document.getElementById('gmsLatS').value;
+            const dirLat = document.getElementById('gmsLatDir').value;
+
+            const dLng = document.getElementById('gmsLngD').value;
+            const mLng = document.getElementById('gmsLngM').value;
+            const sLng = document.getElementById('gmsLngS').value;
+            const dirLng = document.getElementById('gmsLngDir').value;
+
+            if (dLat === '' || dLng === '') {
+                alert('Preencha ao menos os graus da Latitude e Longitude.');
+                return;
+            }
+
+            lat = dmsToDecimal(dLat, mLat, sLat, dirLat);
+            lng = dmsToDecimal(dLng, mLng, sLng, dirLng);
+
+            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                alert('Valores GMS resultaram em coordenadas geográficas inválidas.');
+                return;
+            }
+        }
+
+        if (lat !== null && lng !== null) {
+            addPoint(lat, lng);
+
+            if (document.getElementById('inputDDSingle')) document.getElementById('inputDDSingle').value = '';
+            if (document.getElementById('inputDDSepLat')) document.getElementById('inputDDSepLat').value = '';
+            if (document.getElementById('inputDDSepLng')) document.getElementById('inputDDSepLng').value = '';
+            if (document.getElementById('inputGMSSingle')) document.getElementById('inputGMSSingle').value = '';
+            if (document.getElementById('gmsLatD')) document.getElementById('gmsLatD').value = '';
+            if (document.getElementById('gmsLatM')) document.getElementById('gmsLatM').value = '';
+            if (document.getElementById('gmsLatS')) document.getElementById('gmsLatS').value = '';
+            if (document.getElementById('gmsLngD')) document.getElementById('gmsLngD').value = '';
+            if (document.getElementById('gmsLngM')) document.getElementById('gmsLngM').value = '';
+            if (document.getElementById('gmsLngS')) document.getElementById('gmsLngS').value = '';
+
+            renderCoordsModal();
+        }
+    }
+
     let regionGeoJSON = null;
     let searchResultsData = [];
     let editMode = false;
@@ -1141,8 +1628,11 @@
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.style.display = 'flex';
-            if (modalId === 'modal-coords') updateModalPointsTable();
-            if (modalId === 'modal-hull' && points.length >= 3) calculateHull();
+            if (modalId === 'modal-coords') {
+                updateCoordFormVisibility();
+                renderCoordsModal();
+            }
+            if (modalId === 'modal-hull' && getAllPoints().length >= 3) calculateHull();
             if (modalId === 'modal-dispersion') {
                 const warn = document.getElementById('dispersionWarnNoHull');
                 if (warn) warn.style.display = currentHullGeoJSON ? 'none' : 'block';
@@ -1341,10 +1831,12 @@
         let duplicatesCount = 0;
 
         const existingSet = new Set(
-            points
+            getAllPoints()
                 .filter(p => Array.isArray(p) && p.length >= 2 && p[0] != null && p[1] != null && !isNaN(p[0]) && !isNaN(p[1]))
                 .map(p => `${Number(p[1]).toFixed(6)},${Number(p[0]).toFixed(6)}`)
         );
+
+        const newGroupPoints = [];
 
         records.forEach(item => {
             let lat = null;
@@ -1369,7 +1861,35 @@
                 const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
                 if (!existingSet.has(key)) {
                     existingSet.add(key);
-                    points.push([lng, lat]);
+
+                    // Extração do link de ocorrência externa (barcode do speciesLink ou key do GBIF)
+                    let barcode = null;
+                    let occurrenceUrl = null;
+                    const props = item.properties || item;
+
+                    const rawBc = item.barcode || props.barcode || item.catalognumber || props.catalognumber || item.catalogNumber || props.catalogNumber;
+                    if (rawBc) {
+                        barcode = String(rawBc).trim();
+                        occurrenceUrl = `https://specieslink.net/search/records/barcode/${encodeURIComponent(barcode)}`;
+                    } else if (item.occurrenceID || props.occurrenceID) {
+                        const occId = item.occurrenceID || props.occurrenceID;
+                        if (typeof occId === 'string' && occId.startsWith('http')) {
+                            occurrenceUrl = occId;
+                        }
+                    }
+
+                    if (!occurrenceUrl) {
+                        if (item.references && typeof item.references === 'string' && item.references.startsWith('http')) {
+                            occurrenceUrl = item.references;
+                        } else if (props.references && typeof props.references === 'string' && props.references.startsWith('http')) {
+                            occurrenceUrl = props.references;
+                        } else if (item.key || props.key || item.gbifID || props.gbifID) {
+                            const occKey = item.key || props.key || item.gbifID || props.gbifID;
+                            occurrenceUrl = `https://www.gbif.org/occurrence/${occKey}`;
+                        }
+                    }
+
+                    newGroupPoints.push([lng, lat, { barcode, url: occurrenceUrl }]);
                     addedCount++;
                 } else {
                     duplicatesCount++;
@@ -1380,8 +1900,19 @@
         });
 
         if (addedCount > 0) {
+            const groupName = `Espécie: ${speciesName} (${sourceLabel})`;
+            const newGroup = {
+                id: 'sp_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                name: groupName,
+                speciesName: speciesName,
+                source: sourceLabel,
+                type: 'species',
+                points: newGroupPoints
+            };
+            pointGroups.push(newGroup);
+
             redrawMarkers();
-            alert(`Sucesso! ${addedCount} coordenadas da espécie "${speciesName}" foram importadas (${sourceLabel}).\n\nResumo:\n• Registros retornados: ${records.length}\n• Novas adicionadas: ${addedCount}\n• Duplicadas agrupadas: ${duplicatesCount}\n• Sem coordenadas válidas: ${invalidCoordsCount}\n\nTotal de pontos no projeto: ${points.length}.`);
+            alert(`Sucesso! ${addedCount} coordenadas da espécie "${speciesName}" foram importadas (${sourceLabel}) como um novo grupo: "${groupName}".\n\nResumo:\n• Registros retornados: ${records.length}\n• Novas adicionadas: ${addedCount}\n• Duplicadas agrupadas: ${duplicatesCount}\n• Sem coordenadas válidas: ${invalidCoordsCount}\n\nTotal de pontos no projeto: ${getAllPoints().length}.`);
             closeModal('modal-species');
         } else if (records.length > 0) {
             alert(`A fonte (${sourceLabel}) retornou ${records.length} registros para "${speciesName}", mas nenhum continha novas coordenadas válidas.`);
@@ -1497,182 +2028,525 @@
         reader.readAsArrayBuffer(file);
     });
 
-    function updateModalPointsTable() {
-        const tbody = document.getElementById('modalPointsBody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
+    function renderCoordsModal() {
+        const headerTitle = document.getElementById('modalCoordsTitle');
+        const container = document.getElementById('modalCoordsContent');
+        const footerActions = document.getElementById('modalCoordsFooterActions');
 
-        points.forEach((p, i) => {
-            if (!Array.isArray(p) || p.length < 2 || p[0] == null || p[1] == null || isNaN(p[0]) || isNaN(p[1])) return;
-            const lat = Number(p[1]);
-            const lng = Number(p[0]);
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${i + 1}</td>
-                <td>${lat.toFixed(6)}</td>
-                <td>${lng.toFixed(6)}</td>
-                <td style="text-align: right;">
-                    <button class="action-btn danger" onclick="deletePoint(${i})">Excluir</button>
-                </td>
+        if (!container) return;
+
+        if (activeGroupId === null) {
+            if (headerTitle) headerTitle.innerText = "Lista de Grupos de Coordenadas";
+
+            if (footerActions) {
+                footerActions.innerHTML = `
+                    <button class="danger" onclick="deleteAllPoints()">Excluir Tudo</button>
+                    <button class="secondary" onclick="copyAllCoords()">Copiar Todas</button>
+                `;
+            }
+
+            let html = `
+                <div style="margin-bottom: 12px; font-size: 13px; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;">
+                    <span>Total de Grupos Registrados: <b>${pointGroups.length}</b> | Total de Coordenadas: <b>${getAllPoints().length}</b></span>
+                </div>
+                <table class="points-table-large">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Grupo / Origem da Pesquisa</th>
+                            <th style="width: 140px; text-align: center;">Qtd. Pontos</th>
+                            <th style="width: 220px; text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
             `;
-            tbody.appendChild(row);
-        });
 
-        const addRow = document.createElement('tr');
-        addRow.innerHTML = `
-            <td>+</td>
-            <td><input type="number" step="any" placeholder="Latitude" id="new-lat"></td>
-            <td><input type="number" step="any" placeholder="Longitude" id="new-lng"></td>
-            <td style="text-align: right;">
-                <button class="action-btn success" onclick="addPointFromModal()">Adicionar</button>
-            </td>
-        `;
-        tbody.appendChild(addRow);
-    }
+            if (pointGroups.length === 0) {
+                html += `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 24px;">
+                            Nenhum grupo de coordenadas registrado. Adicione manualmente acima ou importe via Busca por Espécie.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                pointGroups.forEach((group, index) => {
+                    const icon = group.type === 'species' ? '📦' : '📌';
+                    html += `
+                        <tr>
+                            <td><b>${index + 1}</b></td>
+                            <td>
+                                <div style="font-weight: 600; color: var(--text-primary); cursor: pointer;" onclick="openGroupView('${group.id}')">
+                                    ${icon} ${group.name}
+                                </div>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="stat-badge" style="display: inline-block; padding: 2px 8px;">
+                                    <strong>${group.points.length}</strong> ponto${group.points.length !== 1 ? 's' : ''}
+                                </span>
+                            </td>
+                            <td style="text-align: right;">
+                                <button class="action-btn header-btn" style="background: var(--primary);" onclick="openGroupView('${group.id}')">
+                                    🔍 Ver Coordenadas
+                                </button>
+                                <button class="action-btn danger" onclick="deleteGroup('${group.id}')">
+                                    🗑️ Excluir
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
 
-    function deletePoint(index) {
-        points.splice(index, 1);
-        redrawMarkers();
-        updateModalPointsTable();
-    }
+            html += `
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
 
-    function addPointFromModal() {
-        const latInput = document.getElementById('new-lat');
-        const lngInput = document.getElementById('new-lng');
-        const lat = parseFloat(latInput.value);
-        const lng = parseFloat(lngInput.value);
-        if (!isNaN(lat) && !isNaN(lng)) {
-            addPoint(lat, lng);
-            latInput.value = '';
-            lngInput.value = '';
-            updateModalPointsTable();
+        } else {
+            const group = pointGroups.find(g => g.id === activeGroupId);
+            if (!group) {
+                activeGroupId = null;
+                renderCoordsModal();
+                return;
+            }
+
+            if (headerTitle) headerTitle.innerText = `Coordenadas: ${group.name}`;
+
+            if (footerActions) {
+                footerActions.innerHTML = `
+                    <button class="secondary" onclick="closeGroupView()">&larr; Voltar para Grupos</button>
+                    <button class="danger" onclick="deleteGroup('${group.id}')">Excluir Grupo</button>
+                    <button class="secondary" onclick="copyGroupCoords('${group.id}')">Copiar Coordenadas Deste Grupo</button>
+                `;
+            }
+
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--surface-card); padding: 12px 16px; margin-bottom: 16px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <button class="secondary" onclick="closeGroupView()" style="height: 32px; font-size: 12px;">
+                            &larr; Voltar para Todos os Grupos
+                        </button>
+                        <span style="font-size: 14px; font-weight: 700; color: var(--accent);">
+                            Exibindo ${group.points.length} ponto${group.points.length !== 1 ? 's' : ''} do grupo: "${group.name}"
+                        </span>
+                    </div>
+                </div>
+
+                <table class="points-table-large">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Latitude (Decimal)</th>
+                            <th>Longitude (Decimal)</th>
+                            <th>GMS (Graus, Min, Seg)</th>
+                            <th style="width: 100px; text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            if (group.points.length === 0) {
+                html += `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                            Nenhuma coordenada neste grupo.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                group.points.forEach((p, i) => {
+                    const lat = Number(p[1]);
+                    const lng = Number(p[0]);
+                    const latGms = decimalToDMS(lat, true);
+                    const lngGms = decimalToDMS(lng, false);
+
+                    html += `
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td>${lat.toFixed(6)}</td>
+                            <td>${lng.toFixed(6)}</td>
+                            <td style="color: var(--accent); font-size: 12px;">${latGms}, ${lngGms}</td>
+                            <td style="text-align: right;">
+                                <button class="action-btn danger" onclick="deletePointFromGroup('${group.id}', ${i})">Excluir</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
         }
     }
 
-    function copyAllCoords() {
-        if (points.length === 0) {
+    function openGroupView(groupId) {
+        activeGroupId = groupId;
+        renderCoordsModal();
+    }
+
+    function closeGroupView() {
+        activeGroupId = null;
+        renderCoordsModal();
+    }
+
+    let hullActive = false;
+    let dispersionActive = false;
+
+    function toggleHull() {
+        if (hullActive) {
+            clearHull();
+        } else {
+            const pts = getAllPoints();
+            if (pts.length < 3) {
+                alert('Atenção: É necessário registrar no mínimo 3 pontos para calcular o Polígono Convexo (EOO).');
+                return;
+            }
+            const success = calculateHull();
+            if (success) {
+                hullActive = true;
+                const btn = document.getElementById('fab-hull');
+                if (btn) btn.classList.add('active-green');
+
+                const dispBtn = document.getElementById('fab-dispersion');
+                if (dispBtn) {
+                    dispBtn.disabled = false;
+                    dispBtn.classList.remove('disabled');
+                }
+            }
+        }
+    }
+
+    function clearHull() {
+        if (dispersionActive) {
+            clearDispersion();
+        }
+
+        hullLayer.clearLayers();
+        trianglesLayer.clearLayers();
+        currentHullGeoJSON = null;
+        hullActive = false;
+
+        const btn = document.getElementById('fab-hull');
+        if (btn) btn.classList.remove('active-green');
+
+        const dispBtn = document.getElementById('fab-dispersion');
+        if (dispBtn) {
+            dispBtn.disabled = true;
+            dispBtn.classList.add('disabled');
+            dispBtn.classList.remove('active-green', 'active');
+        }
+
+        const headerHullArea = document.getElementById('headerHullArea');
+        if (headerHullArea) headerHullArea.innerText = '-';
+
+        const hullResult = document.getElementById('hullResult');
+        if (hullResult) hullResult.style.display = 'none';
+
+        const occurrenceRateResult = document.getElementById('occurrenceRateResult');
+        if (occurrenceRateResult) occurrenceRateResult.style.display = 'none';
+
+        const dispersionResultCard = document.getElementById('dispersionResultCard');
+        if (dispersionResultCard) dispersionResultCard.style.display = 'none';
+    }
+
+    function toggleDispersion() {
+        if (!hullActive) return;
+
+        if (dispersionActive) {
+            clearDispersion();
+        } else {
+            dispersionActive = true;
+            const dispBtn = document.getElementById('fab-dispersion');
+            if (dispBtn) dispBtn.classList.add('active-green');
+
+            const panel = document.getElementById('dispersionBottomPanel');
+            const body = document.getElementById('dispersionPanelBody');
+            const btn = document.getElementById('btnToggleDispersionMinimize');
+
+            if (panel) panel.style.display = 'flex';
+
+            // Minimizado por padrão ao ativar
+            if (body) body.classList.add('minimized');
+            if (btn) btn.innerText = '▲';
+
+            runSelectedDispersionMethod();
+        }
+    }
+
+    function clearDispersion() {
+        dispersionActive = false;
+        trianglesLayer.clearLayers();
+
+        const dispBtn = document.getElementById('fab-dispersion');
+        if (dispBtn) dispBtn.classList.remove('active-green', 'active');
+
+        const panel = document.getElementById('dispersionBottomPanel');
+        if (panel) panel.style.display = 'none';
+
+        if (document.getElementById('dispersionResultCard')) {
+            document.getElementById('dispersionResultCard').style.display = 'none';
+        }
+    }
+
+    function toggleDispersionPanelMinimize() {
+        const body = document.getElementById('dispersionPanelBody');
+        const btn = document.getElementById('btnToggleDispersionMinimize');
+        if (!body) return;
+
+        const isMinimized = body.classList.contains('minimized');
+        if (isMinimized) {
+            body.classList.remove('minimized');
+            if (btn) btn.innerText = '▼';
+        } else {
+            body.classList.add('minimized');
+            if (btn) btn.innerText = '▲';
+        }
+    }
+
+    function deleteGroup(groupId) {
+        const group = pointGroups.find(g => g.id === groupId);
+        if (!group) return;
+        if (confirm(`Deseja excluir o grupo "${group.name}" com ${group.points.length} ponto(s)?`)) {
+            pointGroups = pointGroups.filter(g => g.id !== groupId);
+            if (activeGroupId === groupId) {
+                activeGroupId = null;
+            }
+            redrawMarkers();
+            renderCoordsModal();
+            if (hullActive) {
+                if (getAllPoints().length >= 3) calculateHull();
+                else clearHull();
+            }
+        }
+    }
+
+    function deletePointFromGroup(groupId, pointIndex) {
+        const group = pointGroups.find(g => g.id === groupId);
+        if (!group) return;
+        group.points.splice(pointIndex, 1);
+        if (group.points.length === 0 && group.type !== 'manual') {
+            pointGroups = pointGroups.filter(g => g.id !== groupId);
+            activeGroupId = null;
+        }
+        redrawMarkers();
+        renderCoordsModal();
+        if (hullActive) {
+            if (getAllPoints().length >= 3) calculateHull();
+            else clearHull();
+        }
+    }
+
+    function copyGroupCoords(groupId) {
+        const group = pointGroups.find(g => g.id === groupId);
+        if (!group || group.points.length === 0) {
             alert('Nenhuma coordenada para copiar.');
             return;
         }
-        const text = points.map(p => `${p[1]}, ${p[0]}`).join('\n');
+        const text = group.points.map(p => `${p[1]}, ${p[0]}`).join('\n');
         navigator.clipboard.writeText(text).then(() => {
-            alert(`${points.length} coordenadas copiadas para a área de transferência!`);
+            alert(`${group.points.length} coordenadas do grupo "${group.name}" copiadas!`);
         });
     }
 
-    function toggleEditMode() {
-        editMode = !editMode;
-        const btn = document.getElementById('fab-edit-mode');
-        const banner = document.getElementById('editModeBanner');
-        const mapEl = document.getElementById('map');
+    function copyAllCoords() {
+        const all = getAllPoints();
+        if (all.length === 0) {
+            alert('Nenhuma coordenada para copiar.');
+            return;
+        }
+        const text = all.map(p => `${p[1]}, ${p[0]}`).join('\n');
+        navigator.clipboard.writeText(text).then(() => {
+            alert(`${all.length} coordenadas copiadas para a área de transferência!`);
+        });
+    }
 
-        if (editMode) {
-            btn.classList.add('active-green');
-            if (banner) banner.style.display = 'flex';
-            if (mapEl) mapEl.style.cursor = 'crosshair';
-        } else {
-            btn.classList.remove('active-green');
-            if (banner) banner.style.display = 'none';
-            if (mapEl) mapEl.style.cursor = '';
+    function deleteAllPoints() {
+        const all = getAllPoints();
+        if (all.length === 0) return;
+        if (confirm('Deseja excluir todas as coordenadas?')) {
+            pointGroups = [];
+            activeGroupId = null;
+            redrawMarkers();
+            renderCoordsModal();
+            clearHull();
+            if (document.getElementById('analysisResult')) document.getElementById('analysisResult').style.display = 'none';
+            if (document.getElementById('occupationRateResult')) document.getElementById('occupationRateResult').style.display = 'none';
+            if (document.getElementById('dispersionResultCard')) document.getElementById('dispersionResultCard').style.display = 'none';
+            document.getElementById('headerHullArea').innerText = '-';
+        }
+    }
+
+    function deletePoint(globalIndex) {
+        let current = 0;
+        for (let gIdx = 0; gIdx < pointGroups.length; gIdx++) {
+            const group = pointGroups[gIdx];
+            if (globalIndex < current + group.points.length) {
+                const localIdx = globalIndex - current;
+                group.points.splice(localIdx, 1);
+                if (group.points.length === 0 && group.type !== 'manual') {
+                    pointGroups.splice(gIdx, 1);
+                }
+                break;
+            }
+            current += group.points.length;
         }
         redrawMarkers();
-    }
-
-    function redrawMarkers() {
-        pointsLayer.clearLayers();
-        points.forEach((p, index) => {
-            if (!Array.isArray(p) || p.length < 2 || p[0] == null || p[1] == null || isNaN(p[0]) || isNaN(p[1])) return;
-            const lat = Number(p[1]);
-            const lng = Number(p[0]);
-            const marker = L.circleMarker([lat, lng], {
-                radius: 6,
-                fillColor: "#ef4444",
-                color: "#ffffff",
-                weight: 1.5,
-                fillOpacity: 1
-            }).addTo(pointsLayer);
-
-            if (!editMode) {
-                const content = `
-                    <div class="popup-coords">${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
-                    <div class="popup-actions">
-                        <button class="popup-btn popup-copy" onclick="copyCoords(${lat}, ${lng})">Copiar</button>
-                        <button class="popup-btn popup-delete" onclick="deletePoint(${index})">Excluir</button>
-                    </div>
-                `;
-                marker.bindPopup(content);
-                marker.on('mouseover', function () {
-                    this.openPopup();
-                });
-            }
-        });
-
-        document.getElementById('headerPointCount').innerText = points.length;
-    }
-
-    function copyCoords(lat, lng) {
-        const text = `${lat}, ${lng}`;
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Coordenadas copiadas: ' + text);
-        });
-    }
-
-    function showRateInfo(event) {
-        event.stopPropagation();
-        const tooltip = document.getElementById('rateInfoTooltip');
-        tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
-        const other = document.getElementById('occupationRateInfoTooltip');
-        if (other) other.style.display = 'none';
-    }
-
-    function showOccupationRateInfo(event) {
-        event.stopPropagation();
-        const tooltip = document.getElementById('occupationRateInfoTooltip');
-        tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
-        const other = document.getElementById('rateInfoTooltip');
-        if (other) other.style.display = 'none';
-    }
-
-    document.addEventListener('click', function(e) {
-        const tooltips = [document.getElementById('rateInfoTooltip'), document.getElementById('occupationRateInfoTooltip')];
-        tooltips.forEach(tooltip => {
-            if (tooltip && tooltip.style.display === 'block') {
-                if (!tooltip.contains(e.target) && !e.target.classList.contains('info-btn')) {
-                    tooltip.style.display = 'none';
-                }
-            }
-        });
-    });
-
-    map.on('click', function(e) {
-        if (editMode) {
-            addPoint(e.latlng.lat, e.latlng.lng);
+        if (document.getElementById('modal-coords').style.display === 'flex') {
+            renderCoordsModal();
         }
-    });
+        if (hullActive) {
+            if (getAllPoints().length >= 3) calculateHull();
+            else clearHull();
+        }
+    }
 
     function addPoint(lat, lng) {
         lat = parseFloat(lat);
         lng = parseFloat(lng);
         if (isNaN(lat) || isNaN(lng) || lat == null || lng == null) return;
-        points.push([lng, lat]);
+
+        if (activeGroupId) {
+            const group = pointGroups.find(g => g.id === activeGroupId);
+            if (group) {
+                group.points.push([lng, lat]);
+            } else {
+                addPointToManualGroup(lat, lng);
+            }
+        } else {
+            addPointToManualGroup(lat, lng);
+        }
+
         redrawMarkers();
 
         if (document.getElementById('modal-coords').style.display === 'flex') {
-            updateModalPointsTable();
+            renderCoordsModal();
         }
+
+        if (hullActive && getAllPoints().length >= 3) {
+            calculateHull();
+        }
+    }
+
+    function addPointToManualGroup(lat, lng) {
+        let manualGroup = pointGroups.find(g => g.type === 'manual');
+        if (!manualGroup) {
+            manualGroup = {
+                id: 'manual',
+                name: 'Pontos Adicionados Manualmente',
+                type: 'manual',
+                points: []
+            };
+            pointGroups.unshift(manualGroup);
+        }
+        manualGroup.points.push([lng, lat]);
+    }
+
+    function redrawMarkers() {
+        pointsLayer.clearLayers();
+        let globalIndex = 0;
+
+        pointGroups.forEach(group => {
+            if (!group.points) return;
+            group.points.forEach((p) => {
+                if (!Array.isArray(p) || p.length < 2 || p[0] == null || p[1] == null || isNaN(p[0]) || isNaN(p[1])) return;
+                const lat = Number(p[1]);
+                const lng = Number(p[0]);
+                const meta = p[2] || {};
+                const idx = globalIndex++;
+
+                const markerColor = group.type === 'species' ? '#38bdf8' : '#ef4444';
+
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 6,
+                    fillColor: markerColor,
+                    color: "#ffffff",
+                    weight: 1.5,
+                    fillOpacity: 1
+                }).addTo(pointsLayer);
+
+                if (!editMode) {
+                    const latGms = decimalToDMS(lat, true);
+                    const lngGms = decimalToDMS(lng, false);
+
+                    const content = `
+                        <div class="popup-card">
+                            <div class="popup-header">
+                                <span class="popup-badge">
+                                    ${group.type === 'species' ? '📦 ' + (group.speciesName || group.name) : '📌 Ponto Manual'}
+                                </span>
+                                ${group.source ? `<span class="popup-source">${group.source}</span>` : ''}
+                            </div>
+
+                            <div class="popup-coords-block">
+                                <div class="popup-coord-row">
+                                    <span class="coord-label">Grau Decimal (GD):</span>
+                                    <span class="coord-val">${lat.toFixed(6)}, ${lng.toFixed(6)}</span>
+                                </div>
+                                <div class="popup-coord-row">
+                                    <span class="coord-label">Graus, Min, Seg (GMS):</span>
+                                    <span class="coord-val">${latGms}, ${lngGms}</span>
+                                </div>
+                            </div>
+
+                            ${meta.url ? `
+                                <a href="${meta.url}" target="_blank" rel="noopener noreferrer" class="popup-link-btn">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                    ${meta.barcode ? `speciesLink (Barcode: ${meta.barcode})` : 'Ver Registro da Ocorrência'}
+                                </a>
+                            ` : ''}
+
+                            <div class="popup-actions-grid">
+                                <button class="popup-action-btn copy-btn" onclick="copyCoordsText('${lat.toFixed(6)}, ${lng.toFixed(6)}', 'DD')">
+                                    Copiar GD
+                                </button>
+                                <button class="popup-action-btn copy-btn" onclick="copyCoordsText('${latGms}, ${lngGms}', 'GMS')">
+                                    Copiar GMS
+                                </button>
+                                <button class="popup-action-btn delete-btn" onclick="deletePoint(${idx})">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    marker.bindPopup(content);
+                }
+            });
+        });
+
+        document.getElementById('headerPointCount').innerText = getAllPoints().length;
+    }
+
+    function copyCoordsText(text, label) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert(`Coordenada (${label}) copiada: ${text}`);
+        });
     }
 
     // Cálculo do Mínimo Polígono Convexo (MPC / EOO)
     function calculateHull() {
-        if (points.length < 3) {
-            document.getElementById('hullNotice').innerHTML = '<span style="color:#ef4444; font-weight:700;">Atenção: É necessário registrar no mínimo 3 pontos para calcular o Polígono Convexo.</span>';
-            document.getElementById('hullResult').style.display = 'none';
-            document.getElementById('occurrenceRateResult').style.display = 'none';
-            document.getElementById('headerHullArea').innerText = '-';
-            return;
+        const pts = getAllPoints();
+        if (pts.length < 3) {
+            const notice = document.getElementById('hullNotice');
+            if (notice) notice.innerHTML = '<span style="color:#ef4444; font-weight:700;">Atenção: É necessário registrar no mínimo 3 pontos para calcular o Polígono Convexo.</span>';
+            const res = document.getElementById('hullResult');
+            if (res) res.style.display = 'none';
+            const occ = document.getElementById('occurrenceRateResult');
+            if (occ) occ.style.display = 'none';
+            const areaLabel = document.getElementById('headerHullArea');
+            if (areaLabel) areaLabel.innerText = '-';
+            return false;
         }
 
-        const featureCollection = turf.featureCollection(points.map(p => turf.point(p)));
+        const featureCollection = turf.featureCollection(pts.map(p => turf.point(p)));
         const hull = turf.convex(featureCollection);
 
         if (hull) {
@@ -1691,11 +2565,14 @@
             }).addTo(hullLayer);
 
             const area = turf.area(hull);
-            document.getElementById('hullArea').innerText = area.toLocaleString('pt-BR');
-            document.getElementById('hullResult').style.display = 'block';
+            const hullAreaEl = document.getElementById('hullArea');
+            if (hullAreaEl) hullAreaEl.innerText = area.toLocaleString('pt-BR');
+            const hullResultEl = document.getElementById('hullResult');
+            if (hullResultEl) hullResultEl.style.display = 'block';
 
             const areaKm2 = (area / 1e6).toFixed(2);
-            document.getElementById('headerHullArea').innerText = `${areaKm2} km²`;
+            const headerHullAreaEl = document.getElementById('headerHullArea');
+            if (headerHullAreaEl) headerHullAreaEl.innerText = `${areaKm2} km²`;
 
             if (regionGeoJSON) {
                 const regionArea = turf.area(regionGeoJSON);
@@ -1708,12 +2585,27 @@
                 else if (percent <= 80) label = "Alta";
                 else label = "Muito Alta";
 
-                document.getElementById('occurrenceRateLabel').innerText = label;
-                document.getElementById('occurrenceRatePercent').innerText = percent.toLocaleString('pt-BR', {maximumFractionDigits: 1});
-                document.getElementById('occurrenceRateResult').style.display = 'block';
+                const occLabel = document.getElementById('occurrenceRateLabel');
+                if (occLabel) occLabel.innerText = label;
+                const occPercent = document.getElementById('occurrenceRatePercent');
+                if (occPercent) occPercent.innerText = percent.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+                const occRes = document.getElementById('occurrenceRateResult');
+                if (occRes) occRes.style.display = 'block';
             }
+
+            const dispBtn = document.getElementById('fab-dispersion');
+            if (dispBtn) {
+                dispBtn.disabled = false;
+                dispBtn.classList.remove('disabled');
+            }
+            if (dispersionActive) {
+                runSelectedDispersionMethod();
+            }
+
+            return true;
         } else {
             alert('Não foi possível formar um polígono convexo com os pontos atuais.');
+            return false;
         }
     }
 
@@ -1984,6 +2876,99 @@
         return Array.from(uniquePtsMap.values());
     }
 
+    function toggleEditMode() {
+        editMode = !editMode;
+        const btn = document.getElementById('fab-edit-mode');
+        const banner = document.getElementById('editModeBanner');
+        const mapEl = document.getElementById('map');
+
+        if (editMode) {
+            if (btn) btn.classList.add('active-green');
+            if (banner) banner.style.display = 'flex';
+            if (mapEl) mapEl.style.cursor = 'crosshair';
+
+            // Bloqueia todos os outros botões da barra lateral
+            document.querySelectorAll('.fab-btn').forEach(b => {
+                if (b !== btn) {
+                    b.disabled = true;
+                    b.classList.add('disabled');
+                }
+            });
+
+            // Bloqueia botões do cabeçalho
+            document.querySelectorAll('header button').forEach(b => {
+                b.disabled = true;
+                b.style.opacity = '0.5';
+                b.style.pointerEvents = 'none';
+            });
+        } else {
+            if (btn) btn.classList.remove('active-green');
+            if (banner) banner.style.display = 'none';
+            if (mapEl) mapEl.style.cursor = '';
+
+            // Desbloqueia os outros botões da barra lateral (respeitando se a dispersão requer EOO)
+            document.querySelectorAll('.fab-btn').forEach(b => {
+                if (b !== btn) {
+                    if (b.id === 'fab-dispersion') {
+                        b.disabled = !hullActive;
+                        b.classList.toggle('disabled', !hullActive);
+                    } else {
+                        b.disabled = false;
+                        b.classList.remove('disabled');
+                    }
+                }
+            });
+
+            // Desbloqueia botões do cabeçalho
+            document.querySelectorAll('header button').forEach(b => {
+                b.disabled = false;
+                b.style.opacity = '';
+                b.style.pointerEvents = '';
+            });
+        }
+        redrawMarkers();
+    }
+
+    function copyCoords(lat, lng) {
+        const text = `${lat}, ${lng}`;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Coordenadas copiadas: ' + text);
+        });
+    }
+
+    function showRateInfo(event) {
+        event.stopPropagation();
+        const tooltip = document.getElementById('rateInfoTooltip');
+        tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        const other = document.getElementById('occupationRateInfoTooltip');
+        if (other) other.style.display = 'none';
+    }
+
+    function showOccupationRateInfo(event) {
+        event.stopPropagation();
+        const tooltip = document.getElementById('occupationRateInfoTooltip');
+        tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        const other = document.getElementById('rateInfoTooltip');
+        if (other) other.style.display = 'none';
+    }
+
+    document.addEventListener('click', function(e) {
+        const tooltips = [document.getElementById('rateInfoTooltip'), document.getElementById('occupationRateInfoTooltip')];
+        tooltips.forEach(tooltip => {
+            if (tooltip && tooltip.style.display === 'block') {
+                if (!tooltip.contains(e.target) && !e.target.classList.contains('info-btn')) {
+                    tooltip.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    map.on('click', function(e) {
+        if (editMode) {
+            addPoint(e.latlng.lat, e.latlng.lng);
+        }
+    });
+
     function getDispersionColor(classification) {
         if (classification.includes("Muito Baixa")) return "#ef4444";
         if (classification.includes("Baixa")) return "#f97316";
@@ -1994,8 +2979,7 @@
     }
 
     function runSelectedDispersionMethod() {
-        if (!currentHullGeoJSON) {
-            alert('Por favor, calcule o polígono convexo (EOO) primeiro.');
+        if (!currentHullGeoJSON || !hullActive) {
             return;
         }
 
@@ -2133,17 +3117,16 @@
         const occupiedPercent = totalTiles > 0 ? (occupiedTilesCount / totalTiles) * 100 : 0;
 
         let dispersionClass = "";
-        if (occupiedPercent <= 20) dispersionClass = "Muito Baixa Dispersão (Muito Concentrada)";
-        else if (occupiedPercent <= 40) dispersionClass = "Baixa Dispersão (Concentrada)";
-        else if (occupiedPercent <= 60) dispersionClass = "Moderada Dispersão";
-        else if (occupiedPercent <= 80) dispersionClass = "Alta Dispersão na EOO";
+        if (occupiedPercent <= 20) dispersionClass = "Baixa Dispersão";
+        else if (occupiedPercent <= 40) dispersionClass = "Moderada Dispersão";
+        else if (occupiedPercent <= 60) dispersionClass = "Alta Dispersão";
+        else if (occupiedPercent <= 80) dispersionClass = "Muito Alta Dispersão";
         else dispersionClass = "Muito Alta Dispersão (Homogênea)";
 
         const avgUnitArea = sumTrianglesGeodesicArea / totalTiles;
         const diffMaxMin = maxTileArea - minTileArea;
         const diffMaxMinPercent = avgUnitArea > 0 ? (diffMaxMin / avgUnitArea) * 100 : 0;
 
-        if (document.getElementById('dispersionMethodTitle')) document.getElementById('dispersionMethodTitle').innerText = "1. Divisão em 100 Partes Idênticas";
         if (document.getElementById('dispersionClassLabel')) {
             document.getElementById('dispersionClassLabel').innerText = dispersionClass;
             document.getElementById('dispersionClassLabel').style.color = getDispersionColor(dispersionClass);
@@ -2155,9 +3138,6 @@
                 • <b>Partes Vazias:</b> ${emptyTilesCount} de 100 (${(100 - occupiedPercent).toFixed(1)}%)<br>
                 • <b>Área Média de Cada Parte:</b> ${avgUnitArea.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²<br>
                 • <b>Variação de Área entre Partes:</b> &plusmn;${diffMaxMin.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m² (${diffMaxMinPercent.toFixed(2)}%)<br>
-                <div class="hint" style="margin-top: 6px;">
-                    Mede a proporção de polígonos idênticos (favo/concêntrico) que possuem ocorrência registrada.
-                </div>
             `;
         }
 
@@ -2219,13 +3199,12 @@
         const cv = meanArea > 0 ? (stdDev / meanArea) * 100 : 0;
 
         let classification = "";
-        if (cv > 120) classification = "Muito Baixa Dispersão (Forte Agrupamento / Ilhas)";
-        else if (cv > 85) classification = "Baixa Dispersão (Aglomeração Espacial)";
-        else if (cv > 55) classification = "Moderada Dispersão (Distribuição Intermediária)";
-        else if (cv > 30) classification = "Alta Dispersão (Bem Espalhada)";
-        else classification = "Muito Alta Dispersão (Uniforme / Homogênea)";
+        if (cv > 120) classification = "Muito Baixa Dispersão";
+        else if (cv > 85) classification = "Baixa Dispersão";
+        else if (cv > 55) classification = "Moderada Dispersão";
+        else if (cv > 30) classification = "Alta Dispersão";
+        else classification = "Muito Alta Dispersão";
 
-        document.getElementById('dispersionMethodTitle').innerText = "2. Polígonos de Voronoi (Tesselação de Dirichlet)";
         document.getElementById('dispersionClassLabel').innerText = classification;
         document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
 
@@ -2234,9 +3213,6 @@
             • <b>Área Média das Células:</b> ${meanArea.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²<br>
             • <b>Desvio Padrão das Áreas:</b> ${stdDev.toLocaleString('pt-BR', {maximumFractionDigits: 1})} m²<br>
             • <b>Coeficiente de Variação (CV):</b> ${cv.toFixed(1)}%<br>
-            <div class="hint" style="margin-top: 6px;">
-                Células Voronoi de áreas semelhantes indicam ampla ocupação sem distorcer o polígono da EOO.
-            </div>
         `;
     }
 
@@ -2284,13 +3260,12 @@
         const R = rExp > 0 ? (rObs / rExp) : 1;
 
         let classification = "";
-        if (R <= 0.45) classification = "Muito Baixa Dispersão (Fortemente Agregado)";
-        else if (R <= 0.80) classification = "Baixa Dispersão (Agregado em Clusters)";
-        else if (R <= 1.15) classification = "Moderada Dispersão (Padrão Aleatório)";
-        else if (R <= 1.50) classification = "Alta Dispersão (Tendência Uniforme)";
-        else classification = "Muito Alta Dispersão (Espaçado Regularmente)";
+        if (R <= 0.45) classification = "Muito Baixa Dispersão";
+        else if (R <= 0.80) classification = "Baixa Dispersão";
+        else if (R <= 1.15) classification = "Moderada Dispersão";
+        else if (R <= 1.50) classification = "Alta Dispersão";
+        else classification = "Muito Alta Dispersão";
 
-        document.getElementById('dispersionMethodTitle').innerText = "3. Índice de Clark-Evans (Vizinho Mais Próximo)";
         document.getElementById('dispersionClassLabel').innerText = classification;
         document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
 
@@ -2362,13 +3337,12 @@
         const occupiedPercent = totalCellsInHull > 0 ? (occupiedCellsCount / totalCellsInHull) * 100 : 0;
 
         let classification = "";
-        if (occupiedPercent <= 20) classification = "Muito Baixa Dispersão (Muito Concentrado)";
-        else if (occupiedPercent <= 40) classification = "Baixa Dispersão (Pouca Cobertura)";
-        else if (occupiedPercent <= 60) classification = "Moderada Dispersão (Distribuição Média)";
-        else if (occupiedPercent <= 80) classification = "Alta Dispersão (Boa Cobertura)";
-        else classification = "Muito Alta Dispersão (Excelente Cobertura da EOO)";
+        if (occupiedPercent <= 20) classification = "Muito Baixa Dispersão";
+        else if (occupiedPercent <= 40) classification = "Baixa Dispersão";
+        else if (occupiedPercent <= 60) classification = "Moderada Dispersão";
+        else if (occupiedPercent <= 80) classification = "Alta Dispersão";
+        else classification = "Muito Alta Dispersão";
 
-        document.getElementById('dispersionMethodTitle').innerText = "4. Grid de Quadrantes Fixos (Padrão IUCN)";
         document.getElementById('dispersionClassLabel').innerText = classification;
         document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
 
@@ -2376,9 +3350,6 @@
             • <b>Quadrantes Ocupados:</b> ${occupiedCellsCount} de ${totalCellsInHull} (${occupiedPercent.toFixed(1)}%)<br>
             • <b>Quadrantes Vazios:</b> ${totalCellsInHull - occupiedCellsCount} (${(100 - occupiedPercent).toFixed(1)}%)<br>
             • <b>Resolução do Grid:</b> 10 x 10 no Bounding Box<br>
-            <div class="hint" style="margin-top: 6px;">
-                Mede a proporção da área do polígono coberta por uma grade fixa regular contendo ocorrências.
-            </div>
         `;
     }
 
@@ -2438,13 +3409,12 @@
         const cv = meanEdge > 0 ? (stdDev / meanEdge) * 100 : 0;
 
         let classification = "";
-        if (cv > 110) classification = "Muito Baixa Dispersão (Clusters Isolados)";
-        else if (cv > 80) classification = "Baixa Dispersão (Agrupamentos Regionais)";
-        else if (cv > 50) classification = "Moderada Dispersão (Rede Equilibrada)";
-        else if (cv > 30) classification = "Alta Dispersão (Rede Uniforme)";
-        else classification = "Muito Alta Dispersão (Distribuição Homogênea)";
+        if (cv > 110) classification = "Muito Baixa Dispersão";
+        else if (cv > 80) classification = "Baixa Dispersão";
+        else if (cv > 50) classification = "Moderada Dispersão";
+        else if (cv > 30) classification = "Alta Dispersão";
+        else classification = "Muito Alta Dispersão";
 
-        document.getElementById('dispersionMethodTitle').innerText = "5. Árvore Geradora Mínima (Minimum Spanning Tree - MST)";
         document.getElementById('dispersionClassLabel').innerText = classification;
         document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
 
@@ -2453,9 +3423,6 @@
             • <b>Comprimento Médio das Arestas:</b> ${(meanEdge >= 1000 ? (meanEdge/1000).toFixed(2) + ' km' : meanEdge.toFixed(1) + ' m')}<br>
             • <b>Desvio Padrão das Arestas:</b> ${(stdDev >= 1000 ? (stdDev/1000).toFixed(2) + ' km' : stdDev.toFixed(1) + ' m')}<br>
             • <b>Coeficiente de Variação (CV):</b> ${cv.toFixed(1)}%<br>
-            <div class="hint" style="margin-top: 6px;">
-                Conexões com distâncias similares indicam que a população está uniformemente distribuída.
-            </div>
         `;
     }
 
@@ -2510,7 +3477,6 @@
         else if (S_score >= -0.35) classification = "Alta Dispersão (Tendência Uniforme)";
         else classification = "Muito Alta Dispersão (Espaçamento Uniforme/Regular)";
 
-        document.getElementById('dispersionMethodTitle').innerText = "6. Função K de Ripley (Análise Multiescala - Besag's L)";
         document.getElementById('dispersionClassLabel').innerText = classification;
         document.getElementById('dispersionClassLabel').style.color = getDispersionColor(classification);
 
