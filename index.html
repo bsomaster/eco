@@ -616,6 +616,10 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
         }
 
+        .leaflet-bar a {
+            border-bottom: 0px solid #ccc;
+        }
+
         .leaflet-control-zoom a, .leaflet-control-layers-toggle, .leaflet-control-locate {
             background-color: var(--surface-dark) !important;
             color: var(--text-primary) !important;
@@ -631,9 +635,65 @@
             margin: 0 !important;
         }
 
-        .leaflet-control-zoom a:hover, .leaflet-control-locate:hover {
+        .leaflet-control-zoom a:hover, .leaflet-control-locate:hover, .leaflet-control-map-type:hover {
             background-color: var(--surface-hover) !important;
             color: var(--accent) !important;
+        }
+
+        .leaflet-control-map-type {
+            background-color: var(--surface-dark) !important;
+            color: var(--text-primary) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 30px !important;
+            height: 30px !important;
+            //line-height: 30px !important;
+            text-align: center !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .map-type-menu {
+            position: absolute;
+            right: 40px;
+            top: 0;
+            width: 100px;
+            background: var(--surface-dark);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+            flex-direction: column;
+            z-index: 2000;
+            overflow: hidden;
+        }
+
+        .map-type-item {
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .map-type-item:last-child {
+            border-bottom: none;
+        }
+
+        .map-type-item:hover {
+            background: var(--surface-hover);
+            color: var(--accent);
+        }
+
+        .map-type-item.active {
+            background: var(--surface-card);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
         }
 
         .leaflet-control-locate svg {
@@ -915,7 +975,7 @@
         </button>
 
         <!-- 7. Análise de Ocupação (AOO) -->
-        <button class="fab-btn" onclick="openModal('modal-occupation')" data-tooltip="Análise de Ocupação (AOO)">
+        <button id="fab-occupation" class="fab-btn disabled" onclick="openModal('modal-occupation')" data-tooltip="Análise de Ocupação (AOO) (Requer EOO Ativo)" disabled>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="18" height="18"></rect>
                 <line x1="3" y1="9" x2="21" y2="9"></line>
@@ -1325,13 +1385,74 @@
         zoomControl: false
     });
 
-    // 1. Controle de Troca de Mapa (No topo, acima dos botões de zoom)
-    const baseMaps = {
-        "Mapa (OSM)": osm,
-        "Satélite": satellite,
-        "Relevo": terrain
-    };
-    L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+    // 1. Controle de Troca de Mapa Personalizado (Botão simples com menu quadrado à esquerda)
+    let activeBaseLayer = osm;
+
+    const MapTypeControl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function () {
+            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control custom-map-type-control');
+            container.style.position = 'relative';
+
+            const button = L.DomUtil.create('a', 'leaflet-control-map-type', container);
+            button.href = '#';
+            button.title = 'Alterar Tipo de Mapa';
+            button.role = 'button';
+            button.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+            `;
+
+            const menu = L.DomUtil.create('div', 'map-type-menu', container);
+            menu.style.display = 'none';
+
+            const layers = [
+                { name: 'Mapa', layer: osm },
+                { name: 'Satélite', layer: satellite },
+                { name: 'Relevo', layer: terrain }
+            ];
+
+            layers.forEach(item => {
+                const menuItem = L.DomUtil.create('div', 'map-type-item', menu);
+                if (item.layer === activeBaseLayer) menuItem.classList.add('active');
+                menuItem.innerHTML = `<span>${item.name}</span>`;
+
+                L.DomEvent.on(menuItem, 'click', function (e) {
+                    L.DomEvent.stopPropagation(e);
+                    L.DomEvent.preventDefault(e);
+                    if (activeBaseLayer !== item.layer) {
+                        map.removeLayer(activeBaseLayer);
+                        map.addLayer(item.layer);
+                        activeBaseLayer = item.layer;
+
+                        menu.querySelectorAll('.map-type-item').forEach(el => el.classList.remove('active'));
+                        menuItem.classList.add('active');
+                    }
+                    menu.style.display = 'none';
+                });
+            });
+
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.on(button, 'click', function (e) {
+                L.DomEvent.preventDefault(e);
+                L.DomEvent.stopPropagation(e);
+                menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!container.contains(e.target)) {
+                    menu.style.display = 'none';
+                }
+            });
+
+            return container;
+        }
+    });
+
+    map.addControl(new MapTypeControl());
 
     // 2. Botões de Zoom (Abaixo da Troca de Mapa)
     L.control.zoom({ position: 'topright' }).addTo(map);
@@ -1624,6 +1745,11 @@
 
     // Navegação de Modais
     function openModal(modalId) {
+        if (modalId === 'modal-occupation' && !hullActive) {
+            alert('A Análise de Ocupação (AOO) requer que o Polígono Convexo (EOO) esteja ativo.');
+            return;
+        }
+
         closeModal(); // fecha qualquer modal aberto
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -1633,10 +1759,6 @@
                 renderCoordsModal();
             }
             if (modalId === 'modal-hull' && getAllPoints().length >= 3) calculateHull();
-            if (modalId === 'modal-dispersion') {
-                const warn = document.getElementById('dispersionWarnNoHull');
-                if (warn) warn.style.display = currentHullGeoJSON ? 'none' : 'block';
-            }
         }
     }
 
@@ -2217,6 +2339,12 @@
                     dispBtn.disabled = false;
                     dispBtn.classList.remove('disabled');
                 }
+
+                const aooBtn = document.getElementById('fab-occupation');
+                if (aooBtn) {
+                    aooBtn.disabled = false;
+                    aooBtn.classList.remove('disabled');
+                }
             }
         }
     }
@@ -2225,6 +2353,8 @@
         if (dispersionActive) {
             clearDispersion();
         }
+
+        closeModal('modal-occupation');
 
         hullLayer.clearLayers();
         trianglesLayer.clearLayers();
@@ -2239,6 +2369,13 @@
             dispBtn.disabled = true;
             dispBtn.classList.add('disabled');
             dispBtn.classList.remove('active-green', 'active');
+        }
+
+        const aooBtn = document.getElementById('fab-occupation');
+        if (aooBtn) {
+            aooBtn.disabled = true;
+            aooBtn.classList.add('disabled');
+            aooBtn.classList.remove('active-green', 'active');
         }
 
         const headerHullArea = document.getElementById('headerHullArea');
@@ -2906,10 +3043,10 @@
             if (banner) banner.style.display = 'none';
             if (mapEl) mapEl.style.cursor = '';
 
-            // Desbloqueia os outros botões da barra lateral (respeitando se a dispersão requer EOO)
+            // Desbloqueia os outros botões da barra lateral (respeitando se a dispersão/AOO requer EOO)
             document.querySelectorAll('.fab-btn').forEach(b => {
                 if (b !== btn) {
-                    if (b.id === 'fab-dispersion') {
+                    if (b.id === 'fab-dispersion' || b.id === 'fab-occupation') {
                         b.disabled = !hullActive;
                         b.classList.toggle('disabled', !hullActive);
                     } else {
